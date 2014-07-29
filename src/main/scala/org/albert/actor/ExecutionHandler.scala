@@ -1,5 +1,5 @@
 import akka.actor.Props
-import com.rtp.dev.actor._
+import org.albert.actor._
 
 /**
  * Created by nutscracker on 6/30/2014.

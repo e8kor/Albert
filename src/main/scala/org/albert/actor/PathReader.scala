@@ -1,7 +1,8 @@
-package com.rtp.dev.actor
+package org.albert.actor
 
-import java.io.{FileFilter, File}
+import java.io.{File, FileFilter}
 import java.nio.file.Path
+
 import akka.actor.Props
 import com.beachape.filemanagement.Messages.RegisterCallback
 
@@ -17,7 +18,7 @@ object PathReader {
 
 class PathReader extends RTActor {
 
-  import com.rtp.dev.{defaultCallback => callbacks}
+  import org.albert.{defaultCallback => callbacks}
 
   implicit val dirFilter = new FileFilter {
     override def accept(file: File): Boolean = file.isDirectory

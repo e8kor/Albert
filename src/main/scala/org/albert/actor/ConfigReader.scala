@@ -1,13 +1,11 @@
-package com.rtp.dev.actor
+package org.albert.actor
 
-import java.io.File
 import java.nio.file.Path
 
-import akka.actor.Actor.Receive
 import akka.actor.Props
 
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 /**
  * Created by nutscracker on 7/22/2014.

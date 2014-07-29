@@ -4,7 +4,7 @@ import sbtassembly.Plugin._
 import sbtbuildinfo.Plugin._
 import AssemblyKeys._
 
-name := "core"
+name := "albert"
 
 version := "0.1-SNAPSHOT"
 
@@ -39,7 +39,7 @@ libraryDependencies ++= Seq(
 
 buildInfoSettings
 
-buildInfoPackage := "com.rtp.info"
+buildInfoPackage := "org.albert.info"
 
 buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
 
@@ -47,9 +47,9 @@ sourceGenerators in Compile <+= buildInfo
 
 assemblySettings
 
-jarName in assembly := "rtp-core.jar"
+jarName in assembly := "albert.jar"
 
-mainClass in assembly := Some("com.rtp.dev.main.Main")
+mainClass in assembly := Some("org.albert.dev.main.Main")
 
 addCompilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
 
