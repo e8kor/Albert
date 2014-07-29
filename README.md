@@ -1,2 +1,2 @@
-[![Build Status](https://travis-ci.org/nutscracker/albert.svg?branch=master)](https://travis-ci.org/nutscracker/albert)
+[![Build Status](https://travis-ci.org/nutscracker/Albert.svg?branch=trunk)](https://travis-ci.org/nutscracker/albert)
 [![Gitter chat](https://badges.gitter.im/nutscracker/albert.png)](https://gitter.im/nutscracker/albert)
