@@ -1,4 +1,4 @@
-package com.rtp.test
+package org.albert.test
 
 import org.scalatest.WordSpec
 

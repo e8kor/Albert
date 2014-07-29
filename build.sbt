@@ -54,5 +54,3 @@ mainClass in assembly := Some("org.albert.dev.main.Main")
 addCompilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
 
 scalacOptions in (Compile, compile) += "-P:wartremover:only-warn-traverser:org.brianmckenna.wartremover.warts.Unsafe"
-
-//scalacOptions in (Compile, compile) += "-P:wartremover:traverser:org.brianmckenna.wartremover.warts.Unsafe"
