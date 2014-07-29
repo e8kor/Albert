@@ -1,0 +1,14 @@
+language: scala
+scala:
+  - 2.11.0
+branches:
+  only:
+    - trunk
+    - master
+notifications:
+  email:
+    recipients:
+      - nutscracker@gmail.com
+jdk:
+  - openjdk7
+  - oraclejdk7
