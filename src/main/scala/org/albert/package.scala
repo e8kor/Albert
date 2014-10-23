@@ -1,28 +1,23 @@
 package org
 
-import java.nio.file.{Path, StandardWatchEventKinds}
+import com.typesafe.scalalogging.LazyLogging
 
-import akka.actor.ActorSystem
-import com.beachape.filemanagement.Messages.RegisterCallback
+import scala.reflect.io.{Path, File}
+
 
 /**
  * Created by nutscracker on 6/29/2014.
  */
-package object albert {
+package object albert{
 
-  object Akka {
-    implicit val system = ActorSystem("rtp")
+  val suiteFileName = "suite.xls"
+  val albert_root = "ALB_ROOT"
+
+  implicit def fileToJFile(path:Path) = (path jfile) toPath
+
+  trait Validator[B] {
+    def validate(arg:B):Either[B,Exception]
   }
 
-  def defaultCallback(implicit path:Path) = Seq(
-    RegisterCallback(StandardWatchEventKinds.ENTRY_CREATE, None, true, path, {v => println(s"created file by path $v")}),
-    RegisterCallback(StandardWatchEventKinds.ENTRY_DELETE, None, true, path, {v => println(s"deleted file by path $v")}),
-    RegisterCallback(StandardWatchEventKinds.ENTRY_MODIFY, None, true, path, {v => println(s"updated file by path $v")})
-  )
-
-  case class SuitePath(path:Path)
-
-  case class Start(path:Path)
-  case object Restart
 }
 

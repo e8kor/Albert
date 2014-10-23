@@ -1,35 +1,29 @@
-package org.albert.actor
+package org.albert
+package actor
 
-import java.nio.file.Path
-
-import akka.actor.Props
-
-import scalaz.Scalaz._
-import scalaz._
+import org.albert.command.WrongPath
+import scala.reflect.io.{Directory, File}
 
 /**
  * Created by nutscracker on 7/22/2014.
  */
 
-object ConfigReader {
+object ConfigReader extends ActorObject
 
-  def apply() = Props(classOf[ConfigReader])
+class ConfigReader extends AlbertActor {
 
-}
+  import scala.reflect.io.Path
 
-class ConfigReader extends RTActor {
+  override def receive: Receive = normal
 
-  override def receive: Receive = {
-
-    case path:Path => checkConfigFiles(path) fold (prepareConfigFiles(path), NoFoundConfig)
-
-    case default => log.warning(s"cant process message $default")
+  def normal:Receive = {
+    case path:Path =>
+      sender() ! (path ifDirectory{extractConfigFilesFromDir(_) map parseFile} getOrElse WrongPath(path))
   }
 
-  def checkConfigFiles(path:Path):Boolean = ???
+  def extractConfigFilesFromDir(dir:Directory):Seq[File] = ???
 
-  def prepareConfigFiles(path:Path):PreparedConfig = ???
+  def parseFile(file:File) = ???
 
-  def getConfigByPath(path:Path) = checkConfigFiles(path) fold (prepareConfigFiles(path), NoFoundConfig)
 
 }
