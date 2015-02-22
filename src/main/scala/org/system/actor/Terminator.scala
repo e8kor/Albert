@@ -1,19 +1,20 @@
-package org.albert.actor
+package org.system
+package actor
 
 import akka.actor.{ActorRef, Terminated}
+
+import scala.language.postfixOps
 
 /**
  * Created by nutscracker on 7/30/2014.
  */
-object Terminator extends ActorObject
-
-class Terminator(app: ActorRef) extends AlbertActor {
+class Terminator(app: ActorRef) extends SystemActor {
 
   context watch app
 
   def receive = {
     case Terminated(actorRef) ⇒
-      log.info("application supervisor has terminated, shutting down")
+      log info freeText("terminatingApplication")
       (context system) shutdown()
   }
 

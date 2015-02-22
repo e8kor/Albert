@@ -15,9 +15,12 @@ autoCompilerPlugins := true
 resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo) ++ Seq("snapshots", "releases", "repo").map(Resolver.typesafeRepo)
 
 libraryDependencies ++= Seq(
+  "org.scala-lang" % "scala-reflect" % "2.11.0" withSources()
+) ++ Seq(
   "com.typesafe.akka" %% "akka-actor"   % "2.3.6" withSources(),
   "com.typesafe.akka" %% "akka-contrib" % "2.3.6" withSources(),
   "com.typesafe.akka" %% "akka-remote"  % "2.3.6" withSources(),
+  "com.typesafe.akka" %% "akka-camel"   % "2.3.6" withSources(),
   "com.typesafe.akka" %% "akka-kernel"  % "2.3.6" withSources()
 ) ++ Seq(
   "org.scalaz"  %% "scalaz-core" % "7.0.6" withSources(),
@@ -39,7 +42,7 @@ libraryDependencies ++= Seq(
 
 buildInfoSettings
 
-buildInfoPackage := "org.albert.info"
+buildInfoPackage := "org.system.info"
 
 buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
 
@@ -47,9 +50,9 @@ sourceGenerators in Compile <+= buildInfo
 
 assemblySettings
 
-jarName in assembly := "albert.jar"
+jarName in assembly := "system.jar"
 
-mainClass in assembly := Some("org.albert.dev.main.Main")
+mainClass in assembly := Some("org.system.dev.main.Main")
 
 addCompilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
 

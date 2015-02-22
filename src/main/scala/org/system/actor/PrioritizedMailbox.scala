@@ -1,9 +1,9 @@
-package org.albert.actor
+package org.system.actor
 
 import akka.actor.ActorSystem
 import akka.dispatch.{PriorityGenerator, UnboundedPriorityMailbox}
 import com.typesafe.config.Config
-import org.albert.message.{Status, Command}
+import org.system.message.{Status, Command}
 
 /**
  * Created by nutscracker on 10/5/2014.
