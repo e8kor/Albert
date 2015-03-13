@@ -1,5 +1,4 @@
 import sbt._
-import sbt.Keys._
 import sbtbuildinfo.Plugin._
 import Resolver.{sonatypeRepo, typesafeRepo}
 
@@ -62,13 +61,20 @@ val compilerPluginsSettings = Seq(
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 )
 
-val allSettings = commonSettings ++ commonBuildInfoSettings ++ compilerPluginsSettings
+val withoutCompilerSettings = commonSettings ++ commonBuildInfoSettings
 
-lazy val root = project in file(".") settings ( allSettings:_*) aggregate(macros, core, test)
+val allSettings = withoutCompilerSettings ++ compilerPluginsSettings
 
-lazy val macros = project in file("macros") settings ( allSettings:_*)
+val rootCompilationSettings = compilerPluginsSettings ++ Seq(
+  run <<= run in Compile in core,
+  run <<= run in Compile in test
+)
 
-lazy val core = project in file("core") settings ( allSettings:_*)
+lazy val root = project in file(".") settings (allSettings ++ rootCompilationSettings:_*) aggregate(macros, core, test)
+
+lazy val macros = project in file("macros") settings ( withoutCompilerSettings:_*)
+
+lazy val core = project in file("core") settings ( withoutCompilerSettings:_*)
 
 lazy val test = project in file("test") settings ( allSettings:_*) dependsOn macros
 
