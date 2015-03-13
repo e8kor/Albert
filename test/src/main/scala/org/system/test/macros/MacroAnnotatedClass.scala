@@ -1,4 +1,4 @@
-package org.mock.test
+package org.system.test.macros
 
 import org.system.macros.TestMacroAnnotation
 

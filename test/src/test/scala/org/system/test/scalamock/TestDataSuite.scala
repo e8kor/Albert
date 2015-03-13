@@ -1,4 +1,4 @@
-package org.mock.test
+package org.system.test.scalamock
 
 import org.scalamock.proxy.Mock
 

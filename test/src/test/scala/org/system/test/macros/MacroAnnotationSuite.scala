@@ -1,4 +1,4 @@
-package org.mock.test
+package org.system.test.macros
 
 /**
  * Created by evgeniikorniichuk on 13/03/15.
