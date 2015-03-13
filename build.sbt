@@ -66,13 +66,13 @@ val withoutCompilerSettings = commonSettings ++ commonBuildInfoSettings
 val allSettings = withoutCompilerSettings ++ compilerPluginsSettings
 
 val rootCompilationSettings = compilerPluginsSettings ++ Seq(
-  run <<= run in Compile in core,
-  run <<= run in Compile in test
+  run <<= run in Test in core,
+  run <<= run in Test in test
 )
 
 lazy val root = project in file(".") settings (allSettings ++ rootCompilationSettings:_*) aggregate(macros, core, test)
 
-lazy val macros = project in file("macros") settings ( withoutCompilerSettings:_*)
+lazy val macros = project in file("macros") settings ( allSettings:_*)
 
 lazy val core = project in file("core") settings ( withoutCompilerSettings:_*)
 

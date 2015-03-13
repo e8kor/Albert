@@ -10,9 +10,12 @@ class MacroAnnotationSuite  extends MacroAnnotationSpec {
    describe("Macro Annotated class ") {
 
      describe("should have") {
+       it("dummy method with returns dummy string") {
+         assert(instance.dummy == "dummy")
+       }
 
        it("hello method with returns hello string") {
-         assert(instance.hello(), "hello")
+         assert(instance.hello == "hello")
        }
 
      }
