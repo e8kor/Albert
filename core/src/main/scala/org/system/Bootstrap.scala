@@ -19,4 +19,5 @@ class Bootstrap extends akka.kernel.Bootable {
     actorSystem shutdown()
     sys exit 0
   }
+
 }

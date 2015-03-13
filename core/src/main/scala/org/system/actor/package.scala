@@ -139,14 +139,7 @@ package object actor {
 
   trait SystemCamelConsumerActor extends SystemActor with Consumer
 
-  trait SystemActor extends Actor with ActorLogging {
-
-    def other: Receive = {
-      case default: Message =>
-        log warning(freeText("cantHandle"), default)
-    }
-
-  }
+  trait SystemActor extends Actor with ActorLogging
 
   trait SystemActorProcessor extends PersistentActor with ActorLogging
 
@@ -164,33 +157,32 @@ package object implicits {
 
   import scala.reflect.io.{Directory, File, Path => ScalaPath}
 
-  implicit class ReceiveOps(receive: Receive) extends AnyVal {
+  implicit class ReceiveOps(val receive: Receive) extends AnyVal
 
-    def or(partialFunction: PartialFunction[Any, Any]) = receive orElse (partialFunction asInstanceOf)
+  implicit class PathOps(val path: ScalaPath) extends AnyVal {
 
-    def |: (partialFunction: PartialFunction[Any, Any]) =  or(partialFunction)
-    def | (partialFunction: PartialFunction[Any, Any]) =  or(partialFunction)
-    def :| (partialFunction: PartialFunction[Any, Any]) =  or(partialFunction)
-  }
-
-  implicit class PathOps(path: ScalaPath) extends AnyVal {
-
-    def toDirOrParentDir: Directory = path ifFile (_ parent) getOrElse (path toDirectory)
+    def toDirOrParentDir(): Directory = path ifFile (_ parent) getOrElse (path toDirectory)
 
     def filesAndDirs(): (Iterator[File], Iterator[Directory]) = {
-      val dir = toDirOrParentDir
+      val dir = toDirOrParentDir()
       (dir files) -> (dir dirs)
+    }
+
+    def filesAndDirs(forFiles: File => Unit)(forDirs: Directory => Unit) {
+      val dir = toDirOrParentDir()
+      (dir files) foreach forFiles
+      (dir dirs) foreach forDirs
     }
 
   }
 
-  implicit class FileOps(it: File) extends AnyVal {
+  implicit class FileOps(val it: File) extends AnyVal {
 
     def isRequiredFile: Boolean = requiredFileNames() exists (((it name) trim) eq)
 
   }
 
-  implicit class DirectoryOps(it: Directory) extends AnyVal {
+  implicit class DirectoryOps(val it: Directory) extends AnyVal {
 
     def requiredFiles(): Iterator[File] = (it files) filter (_ isRequiredFile)
 
