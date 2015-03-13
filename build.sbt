@@ -39,21 +39,12 @@ lazy val unitTest = Seq(
   "org.scalatest" %  "scalatest_2.11"              % "2.2.4" % "test" withSources()
 )
 
-val commonSettings = Seq (
-
+val commonSettings = buildInfoSettings ++ Seq (
   scalaVersion in ThisBuild := "2.11.6",
-
   resolvers ++= (Seq("snapshots", "releases") map sonatypeRepo) ++ (Seq("snapshots", "releases", "repo") map typesafeRepo),
-
-  libraryDependencies ++= thirdParties ++ scalaLibraries ++ akka ++ typesafe ++ macwaremill ++ unitTest
-)
-
-val commonBuildInfoSettings = buildInfoSettings ++ Seq(
-
+  libraryDependencies ++= thirdParties ++ scalaLibraries ++ akka ++ typesafe ++ macwaremill ++ unitTest,
   buildInfoPackage := "org.system.info",
-
   buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion),
-
   sourceGenerators in Compile <+= buildInfo
 )
 
@@ -61,20 +52,18 @@ val compilerPluginsSettings = Seq(
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 )
 
-val withoutCompilerSettings = commonSettings ++ commonBuildInfoSettings
+val allSettings = commonSettings ++ compilerPluginsSettings
 
-val allSettings = withoutCompilerSettings ++ compilerPluginsSettings
-
-val rootCompilationSettings = compilerPluginsSettings ++ Seq(
-  run <<= run in Test in core,
-  run <<= run in Test in test
+val rootCompilationSettings = Seq(
+  run <<= run in Compile in core,
+  run <<= run in Compile in test
 )
 
 lazy val root = project in file(".") settings (allSettings ++ rootCompilationSettings:_*) aggregate(macros, core, test)
 
 lazy val macros = project in file("macros") settings ( allSettings:_*)
 
-lazy val core = project in file("core") settings ( withoutCompilerSettings:_*)
+lazy val core = project in file("core") settings ( allSettings:_*)
 
 lazy val test = project in file("test") settings ( allSettings:_*) dependsOn macros
 
