@@ -7,7 +7,8 @@ import scala.language.postfixOps
 lazy val thirdParties = Seq(
   "org.scalaz"  %% "scalaz-core" % "7.0.6" withSources(),
   "com.chuusai" %% "shapeless"   % "2.0.0" withSources(),
-  "com.beachape.filemanagement" %% "schwatcher" % "0.1.5" withSources()
+  "com.beachape.filemanagement" %% "schwatcher" % "0.1.5" withSources(),
+  "org.apache.activemq" % "activemq-camel" % "5.11.1" withSources()
 )
 
 lazy val scalaLibraries = Seq(
@@ -59,11 +60,11 @@ val rootCompilationSettings = Seq(
   run <<= run in Compile in test
 )
 
-lazy val root = project in file(".") settings (allSettings ++ rootCompilationSettings:_*) aggregate(macros, core, test)
+lazy val root = project in file(".") settings (commonSettings ++ rootCompilationSettings:_*) aggregate(macros, core, test)
 
 lazy val macros = project in file("macros") settings ( allSettings:_*)
 
-lazy val core = project in file("core") settings ( allSettings:_*)
+lazy val core = project in file("core") settings ( commonSettings :_*)
 
 lazy val test = project in file("test") settings ( allSettings:_*) dependsOn macros
 

@@ -1,6 +1,8 @@
 package org
 
+import akka.camel.CamelExtension
 import com.typesafe.config.Config
+import org.apache.activemq.camel.component.ActiveMQComponent
 
 import scala.language.postfixOps
 
@@ -42,5 +44,11 @@ package object system {
     (result asInstanceOf)[T]
   }
 
+  def prepareCamel(system: ActorSystem) = {
+    val camel = CamelExtension(system)
+    (camel context) removeComponent default("mqComponent")
+    (camel context) addComponent(default("mqComponent"), ActiveMQComponent activeMQComponent default("mqURL"))
+    camel
+  }
 }
 

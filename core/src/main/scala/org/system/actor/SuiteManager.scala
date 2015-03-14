@@ -1,12 +1,12 @@
 package org.system
 package actor
 
-import scala.language.postfixOps
-import scala.reflect.io.{Directory, Path}
-
 import akka.actor.{ActorRef, PoisonPill}
 import org.system.command._
 import org.system.implicits.DirectoryOps
+
+import scala.language.postfixOps
+import scala.reflect.io.Directory
 
 /**
  * Created by nutscracker on 8/2/2014.
@@ -16,6 +16,10 @@ class SuiteManager(suiteDir: Directory) extends SystemActor {
 
   val suiteDirs: Seq[Directory] = suiteDir findSlaveSuites()
   suiteDirs foreach (dir => (context system) actorOf(withProps[SuiteManager](dir), dir name))
+
+
+  (context system) actorOf(withProps[CamelConsumerSystemActor](self), (suiteDir name) concat "Consumer")
+  (context system) actorOf(withProps[CamelProducerSystemActor](), (suiteDir name) concat "Producer")
 
   (context system) actorOf(withProps[PathListener](self, suiteDir), (suiteDir name) concat "Listener")
   (context system) actorOf(withProps[ConfigReader](self, suiteDir), (suiteDir name) concat "ConfigReader")

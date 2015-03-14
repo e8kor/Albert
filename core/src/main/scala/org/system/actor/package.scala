@@ -29,11 +29,11 @@ package object command {
   import akka.actor.PossiblyHarmful
   import org.system.message.Command
 
-  import scala.reflect.io.{File, Path}
+  import scala.reflect.io.Path
 
   case class WrongSuitePath(path: Path) extends Command
 
-  case class ParsedConfig(suiteConfig:SuiteConfig) extends Command
+  case class ParsedConfig(suiteConfig: SuiteConfig) extends Command
 
   case class Start(path: Path) extends Command
 
@@ -51,11 +51,11 @@ package object command {
 
 package object plugin {
 
-  case class PluginScript(script:String)
+  case class PluginScript(script: String)
 
-  case class PluginType(pluginName:String)
+  case class PluginType(pluginName: String)
 
-  case class PluginCommand(pluginType:PluginType, pluginScript: PluginScript)
+  case class PluginCommand(pluginType: PluginType, pluginScript: PluginScript)
 
 }
 
@@ -85,67 +85,53 @@ package object suite {
 
   import akka.actor.ActorPath
   import org.system.message.SuiteStep
+
   import scala.reflect.io.File
 
   case class ParallelStep(suite: ActorPath) extends SuiteStep
 
-  case class ExcelFile(file:File)
+  case class ExcelFile(file: File)
 
-  case class PropertiesFile(file:File)
+  case class PropertiesFile(file: File)
 
-  case class SuiteConfig(excel:ExcelFile, propertiesFile: PropertiesFile)
+  case class SuiteConfig(excel: ExcelFile, propertiesFile: PropertiesFile)
 
 }
 
 package object actor {
 
-  import akka.actor.{Actor, ActorLogging, ActorRef, LoggingFSM, Props}
+  import akka.actor.{Actor, ActorLogging, ActorRef, Props}
   import akka.camel.{Consumer, Producer}
-  import akka.persistence.PersistentActor
   import com.beachape.filemanagement.MonitorActor
-  import org.system.message.Message
-
-  import scala.reflect.io.Path
 
   object withProps {
 
+    import scala.reflect.io.Path
     import scala.reflect.{ClassTag, classTag}
 
-    def apply[T: ClassTag](): Props = props[T](None)
+    def apply[T: ClassTag](): Props = Props(classTag[T] runtimeClass)
 
-    def apply[T: ClassTag](actorRef: ActorRef): Props = props(Some(actorRef))
+    def apply[T: ClassTag](actorRef: ActorRef): Props = Props(classTag[T] runtimeClass, actorRef)
 
     def apply[T: ClassTag](concurrency: Int): Props = Props(classTag[T] runtimeClass, concurrency)
 
     def apply[T: ClassTag](path: Path): Props = Props(classTag[T] runtimeClass, path)
 
+    def apply[T: ClassTag](topic: String): Props = Props(classTag[T] runtimeClass, topic)
+
     def apply[T: ClassTag](actorRef: ActorRef, path: Path): Props = Props(classTag[T] runtimeClass, actorRef, path)
 
-
-    def props[T: ClassTag](actorRef: Option[ActorRef]): Props = actorRef map {
-      value =>
-        Props(classTag[T] runtimeClass, value)
-    } getOrElse {
-      Props(classTag[T] runtimeClass)
-    }
+    def apply[T: ClassTag](actorRef: ActorRef, key: String): Props = Props(classTag[T] runtimeClass, actorRef, key)
 
   }
-
-  trait SystemCamelProducerActor extends SystemActor with Producer {
-
-    def queueType: String
-
-  }
-
-  trait SystemCamelConsumerActor extends SystemActor with Consumer
 
   trait SystemActor extends Actor with ActorLogging
 
-  trait SystemActorProcessor extends PersistentActor with ActorLogging
+  trait SystemCamelProducerActor extends SystemActor with Producer
+
+  trait SystemCamelConsumerActor extends SystemActor with Consumer
 
   trait SystemActorMonitor extends MonitorActor with ActorLogging
-
-  class SystemActorFSM[S, D] extends Actor with LoggingFSM[S, D]
 
 }
 
@@ -161,15 +147,15 @@ package object implicits {
 
   implicit class PathOps(val path: ScalaPath) extends AnyVal {
 
-    def toDirOrParentDir(): Directory = path ifFile (_ parent) getOrElse (path toDirectory)
+    def dirOrParentDir(): Directory = path ifFile (_ parent) getOrElse (path toDirectory)
 
     def filesAndDirs(): (Iterator[File], Iterator[Directory]) = {
-      val dir = toDirOrParentDir()
+      val dir = dirOrParentDir()
       (dir files) -> (dir dirs)
     }
 
     def filesAndDirs(forFiles: File => Unit)(forDirs: Directory => Unit) {
-      val dir = toDirOrParentDir()
+      val dir = dirOrParentDir()
       (dir files) foreach forFiles
       (dir dirs) foreach forDirs
     }
