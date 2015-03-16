@@ -16,23 +16,18 @@ lazy val scalaLibraries = Seq(
 )
 
 lazy val akka = Seq(
-  "com.typesafe.akka" %% "akka-actor"   % "2.3.6" withSources(),
-  "com.typesafe.akka" %% "akka-contrib" % "2.3.6" withSources(),
-  "com.typesafe.akka" %% "akka-remote"  % "2.3.6" withSources(),
-  "com.typesafe.akka" %% "akka-camel"   % "2.3.6" withSources(),
-  "com.typesafe.akka" %% "akka-kernel"  % "2.3.6" withSources()
+  "com.typesafe.akka" %% "akka-actor"   % "2.3.9" withSources(),
+  "com.typesafe.akka" %% "akka-contrib" % "2.3.9" withSources(),
+  "com.typesafe.akka" %% "akka-remote"  % "2.3.9" withSources(),
+  "com.typesafe.akka" %% "akka-camel"   % "2.3.9" withSources(),
+  "com.typesafe.akka" %% "akka-kernel"  % "2.3.9" withSources()
 ) ++ Seq(
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.6" % "test" withSources()
+  "com.typesafe.akka" %% "akka-testkit" % "2.3.9" % "test" withSources()
 )
 
 lazy val typesafe = Seq(
   "com.typesafe"                %  "config"        % "1.2.0" withSources(),
   "com.typesafe.scala-logging"  %% "scala-logging" % "3.1.0" withSources()
-)
-
-lazy val macwaremill = Seq(
-  "com.softwaremill.macwire" %% "macros"  % "0.7" withSources(),
-  "com.softwaremill.macwire" %% "runtime" % "0.7" withSources()
 )
 
 lazy val unitTest = Seq(
@@ -43,28 +38,30 @@ lazy val unitTest = Seq(
 val commonSettings = buildInfoSettings ++ Seq (
   scalaVersion in ThisBuild := "2.11.6",
   resolvers ++= (Seq("snapshots", "releases") map sonatypeRepo) ++ (Seq("snapshots", "releases", "repo") map typesafeRepo),
-  libraryDependencies ++= thirdParties ++ scalaLibraries ++ akka ++ typesafe ++ macwaremill ++ unitTest,
+  libraryDependencies ++= thirdParties ++ akka ++ typesafe ++ unitTest,
   buildInfoPackage := "org.system.info",
   buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion),
   sourceGenerators in Compile <+= buildInfo
 )
 
-val compilerPluginsSettings = Seq(
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
+val macroSettings = Seq(
+  libraryDependencies ++= scalaLibraries,
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross (CrossVersion full))
 )
 
-val allSettings = commonSettings ++ compilerPluginsSettings
-
-val rootCompilationSettings = Seq(
-  run <<= run in Compile in core,
+val rootSettings = Seq(
   run <<= run in Compile in test
 )
 
-lazy val root = project in file(".") settings (commonSettings ++ rootCompilationSettings:_*) aggregate(macros, core, test)
+lazy val root = project in file(".") settings ( commonSettings ++ rootSettings:_* ) aggregate(macros, core, test, model)
 
-lazy val macros = project in file("macros") settings ( allSettings:_*)
+lazy val macros = project in file("macros") settings ( macroSettings:_*)
 
-lazy val core = project in file("core") settings ( commonSettings :_*)
+lazy val core = project in file("core") settings ( commonSettings :_*) dependsOn (model, api)
 
-lazy val test = project in file("test") settings ( allSettings:_*) dependsOn macros
+lazy val model = project in file("model") settings ( commonSettings :_*)
+
+lazy val api = project in file("api") settings ( macroSettings ++ commonSettings :_*)
+
+lazy val test = project in file("test") settings ( macroSettings ++ commonSettings:_*) dependsOn macros
 

@@ -4,15 +4,15 @@ package actor
 import java.nio.file.StandardWatchEventKinds.{ENTRY_CREATE => Created, ENTRY_MODIFY => Modified}
 import java.nio.file.WatchEvent.Kind
 
+import akka.actor.{ActorRef, PoisonPill, Terminated}
+import com.beachape.filemanagement.Messages.RegisterCallback
+import com.beachape.filemanagement.MonitorActor
 import com.beachape.filemanagement.RegistryTypes.Callback
+import org.implicits.{PathOps, fileToJFile}
+import org.system.api.actor.withProps
 
 import scala.language.postfixOps
 import scala.reflect.io.{Directory, File, Path}
-
-import akka.actor.{ActorRef, PoisonPill, Terminated}
-import com.beachape.filemanagement.MonitorActor
-import com.beachape.filemanagement.Messages.RegisterCallback
-import org.system.implicits.{PathOps, fileToJFile}
 
 /**
  * Created by nutscracker on 6/30/2014.

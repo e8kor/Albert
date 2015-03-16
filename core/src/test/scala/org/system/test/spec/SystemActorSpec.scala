@@ -2,9 +2,7 @@ package org.system
 package test.spec
 
 import akka.actor.ActorSystem
-import akka.camel.CamelExtension
 import akka.testkit.{ImplicitSender, TestKit}
-import org.apache.activemq.camel.component.ActiveMQComponent
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
 
 import scala.language.postfixOps
@@ -19,9 +17,9 @@ class SystemActorSpec(system: ActorSystem)
   with MustMatchers
   with BeforeAndAfterAll {
 
-  def this() = this(ActorSystem("SystemActorSpec"))
+  def this() = this(ActorSystem create default("systemName"))
 
-  override def beforeAll(): Unit = {
+  override def beforeAll() {
     prepareCamel(system)
   }
 

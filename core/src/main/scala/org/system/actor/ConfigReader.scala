@@ -2,8 +2,8 @@ package org.system
 package actor
 
 import akka.actor.{ActorRef, PoisonPill, Terminated}
-import org.system.command.{ParsedConfig, WrongSuitePath}
-import org.system.implicits.DirectoryOps
+import org.implicits.DirectoryOps
+import org.system.command.WrongSuitePath
 import org.system.suite.{ExcelFile, PropertiesFile, SuiteConfig}
 
 import scala.language.postfixOps
@@ -25,7 +25,7 @@ class ConfigReader(suiteManager: ActorRef, dir: Directory) extends SystemActor {
         }
     } map {
       case (excel, properties) =>
-        ParsedConfig(SuiteConfig(ExcelFile(excel), PropertiesFile(properties)))
+        SuiteConfig(ExcelFile(excel), PropertiesFile(properties))
     } getOrElse WrongSuitePath(dir)
   }
 
@@ -49,7 +49,7 @@ class ConfigReader(suiteManager: ActorRef, dir: Directory) extends SystemActor {
           }
       } map {
         case (excel, properties) =>
-          ParsedConfig(SuiteConfig(ExcelFile(excel), PropertiesFile(properties)))
+          SuiteConfig(ExcelFile(excel), PropertiesFile(properties))
       } getOrElse WrongSuitePath(dir)
     }
   }

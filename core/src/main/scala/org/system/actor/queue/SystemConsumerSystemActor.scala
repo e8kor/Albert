@@ -1,16 +1,17 @@
-package org.system
-package actor
+package org.system.actor.queue
 
 import akka.actor.ActorRef
 import akka.camel.CamelMessage
+import org.system._
+import org.system.actor.SystemConsumerActor
 
 /**
  * Created by evgeniikorniichuk on 08.11.14.
  */
-class CamelConsumerSystemActor(
+class SystemConsumerSystemActor(
                                 val proxy:ActorRef,
                                 override val endpointUri: String = default("consumerEndpointUrl")
-                                ) extends SystemCamelConsumerActor {
+                                ) extends SystemConsumerActor {
 
   override def receive: Receive = normal
 

@@ -2,8 +2,11 @@ package org.system
 package actor
 
 import akka.actor.{ActorRef, PoisonPill}
+import org.implicits.DirectoryOps
+import org.system.actor.queue.{SystemProducerSystemActor, SystemConsumerSystemActor}
+import org.system.api.actor.withProps
 import org.system.command._
-import org.system.implicits.DirectoryOps
+import org.system.suite.SuiteConfig
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
@@ -18,8 +21,8 @@ class SuiteManager(suiteDir: Directory) extends SystemActor {
   suiteDirs foreach (dir => (context system) actorOf(withProps[SuiteManager](dir), dir name))
 
 
-  (context system) actorOf(withProps[CamelConsumerSystemActor](self), (suiteDir name) concat "Consumer")
-  (context system) actorOf(withProps[CamelProducerSystemActor](), (suiteDir name) concat "Producer")
+  (context system) actorOf(withProps[SystemConsumerSystemActor](self), (suiteDir name) concat "Consumer")
+  (context system) actorOf(withProps[SystemProducerSystemActor](), (suiteDir name) concat "Producer")
 
   (context system) actorOf(withProps[PathListener](self, suiteDir), (suiteDir name) concat "Listener")
   (context system) actorOf(withProps[ConfigReader](self, suiteDir), (suiteDir name) concat "ConfigReader")
@@ -28,18 +31,18 @@ class SuiteManager(suiteDir: Directory) extends SystemActor {
   override def receive: Receive = configure orElse stop()
 
   private def configure: Receive = {
-    case parsedConfig: ParsedConfig if getActors isEmpty =>
+    case parsedConfig: SuiteConfig if getActors isEmpty =>
       log info (freeText("noSubSuites"), suiteDir name)
       context become (work orElse stop())
       getWorker foreach (_ ! parsedConfig)
-    case parsedConfig: ParsedConfig if getActors nonEmpty =>
+    case parsedConfig: SuiteConfig if getActors nonEmpty =>
       context become (slaves(parsedConfig) orElse stop())
     case WrongSuitePath(path) =>
       self ! PoisonPill
       log error(freeText("wrongPath"), suiteDir name, path)
   }
 
-  private def slaves(parsedConfig: ParsedConfig): Receive = {
+  private def slaves(parsedConfig: SuiteConfig): Receive = {
     case SuiteCompleted if getActors isEmpty =>
       context become (work orElse stop())
       ((context system) actorOf withProps[Worker](self)) ! parsedConfig

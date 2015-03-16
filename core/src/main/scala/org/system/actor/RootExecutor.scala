@@ -1,15 +1,12 @@
-package org.system
-package actor
-
-import org.system.actor.withProps
-
-import scala.language.postfixOps
+package org.system.actor
 
 import akka.actor.{OneForOneStrategy, PoisonPill, SupervisorStrategy}
+import org.implicits.DirectoryOps
+import org.system._
+import org.system.api.actor.withProps
 import org.system.command._
-import org.system.implicits.{DirectoryOps, PathOps}
-import org.system.plugin.PluginCommand
 
+import scala.language.postfixOps
 import scala.reflect.io.Directory
 
 /**
@@ -35,7 +32,6 @@ class RootExecutor(rootDir: Directory) extends SystemActor {
       log info freeText("allSuitesFinished")
       (context system) shutdown()
       log info freeText("shuttingDown")
-    case PluginCommand(pluginType, pluginScript) =>
   }
 
 }
