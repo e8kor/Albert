@@ -8,7 +8,8 @@ lazy val thirdParties = Seq(
   "org.scalaz"  %% "scalaz-core" % "7.0.6" withSources(),
   "com.chuusai" %% "shapeless"   % "2.0.0" withSources(),
   "com.beachape.filemanagement" %% "schwatcher" % "0.1.5" withSources(),
-  "org.apache.activemq" % "activemq-camel" % "5.11.1" withSources()
+  "org.apache.activemq" %  "activemq-camel" % "5.11.1" withSources(),
+  "net.ceedubs"         %% "ficus"          % "1.1.2"  withSources()
 )
 
 lazy val scalaLibraries = Seq(
@@ -53,13 +54,13 @@ val rootSettings = Seq(
   run <<= run in Compile in test
 )
 
-lazy val root = project in file(".") settings ( commonSettings ++ rootSettings:_* ) aggregate(macros, core, test, model)
+lazy val root = project in file(".") settings ( commonSettings ++ rootSettings:_* ) aggregate(macros, core, test, api, rtp)
+
+lazy val rtp = project in file("rtp-plugin") settings (  commonSettings :_*) dependsOn api
 
 lazy val macros = project in file("macros") settings ( macroSettings:_*)
 
-lazy val core = project in file("core") settings ( commonSettings :_*) dependsOn (model, api)
-
-lazy val model = project in file("model") settings ( commonSettings :_*)
+lazy val core = project in file("core") settings ( commonSettings :_*) dependsOn api
 
 lazy val api = project in file("api") settings ( macroSettings ++ commonSettings :_*)
 
