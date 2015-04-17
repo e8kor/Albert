@@ -1,4 +1,6 @@
-package org.system.plugin.model.command
+package org.system.command
+
+import org.system.model.command.{Responce, Request}
 
 /**
  * Created by evgeniikorniichuk on 24/03/15.

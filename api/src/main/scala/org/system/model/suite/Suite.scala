@@ -1,9 +1,9 @@
-package org.system.plugin.model.suite
+package org.system.model.suite
 
 import com.typesafe.config.Config
 import org.system.{FileName, ID}
-import org.system.plugin.model.scenario.Scenario
-import org.system.plugin.transport.Transport
+import org.system.model.scenario.Scenario
+import org.system.transport.Transport
 
 import scala.reflect.io.File
 

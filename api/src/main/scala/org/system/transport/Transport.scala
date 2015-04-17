@@ -1,6 +1,6 @@
-package org.system.plugin.transport
+package org.system.transport
 
-import org.system.plugin.model.config.TransportConfig
+import org.system.model.config.TransportConfig
 import org.system.{Description, ID, Type}
 
 /**

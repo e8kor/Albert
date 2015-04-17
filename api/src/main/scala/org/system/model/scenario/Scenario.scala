@@ -1,4 +1,4 @@
-package org.system.plugin.model.scenario
+package org.system.model.scenario
 
 import org.system.ID
 

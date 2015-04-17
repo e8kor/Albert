@@ -42,7 +42,7 @@ package object system {
     val result = if ((typeTag isInstanceOf)[String]) {
       config getString path
     } else if ((typeTag isInstanceOf)[List[String]]) {
-      (config getStringList path)
+      config getStringList path
     }
     (result asInstanceOf)[T]
   }
@@ -53,11 +53,13 @@ package object system {
     (camel context) addComponent (default("mqComponent"), ActiveMQComponent activeMQComponent default("mqURL"))
   }
 
+  trait Type
+
+  trait TransportType extends Type
+
+  trait State
+
   type ID = String
-
-  type Type = String
-
-  type State = String
 
   type Description = String
 

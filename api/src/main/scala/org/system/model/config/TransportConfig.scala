@@ -1,4 +1,4 @@
-package org.system.plugin.model.config
+package org.system.model.config
 
 import java.net.URL
 

@@ -1,4 +1,4 @@
-package org.system.plugin.model
+package org.system.model
 
 /**
  * Created by evgeniikorniichuk on 15/03/15.

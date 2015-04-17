@@ -3,12 +3,12 @@ package core
 package main
 
 import akka.actor.{ActorRef, PoisonPill, Props}
+import com.beachape.filemanagement.MonitorActor
 import com.typesafe.config.Config
-import com.typesafe.config.ConfigFactory._
-import org.implicits.{ConfigOps, DirectoryOps}
-import org.system.core.delegat.PathListener
-import org.system.plugin.model.command.manage.{Stop, SuiteCompleted, WorkCompleted, WrongSuitePath}
-import org.system.plugin.model.scenario.Scenario
+import org.implicits.{config2ConfigOps, dir2DirOps, path2PathOps}
+import org.system.command.manage._
+import org.system.command.status.{ReadingConfig, Status, WaitingForSubSuite, Working}
+import org.system.model.scenario.Scenario
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
@@ -21,38 +21,44 @@ class SuiteManager(suiteDir: Directory, rootConfig:Config) extends SystemActor {
 
   require(suiteDir suiteConfig() isDefined, freeText("suiteConfigNotFound"))
 
-  val suiteConfig = suiteDir suiteConfig() map(_ jfile) map parseFile getOrElse empty() withFallback rootConfig
-  val suiteDirs = suiteDir findSlaveSuites()
+  suiteDir suiteConfig() map(_ withFallback rootConfig) foreach {
+    config =>
+      require(config findClass "configReader" isDefined, freeText("configReaderNotFound"))
+      require(config findClass "worker" isDefined, freeText("workerNotFound"))
 
-  require(suiteConfig findClass "configReader" isDefined, freeText("configReaderNotFound"))
-  require(suiteConfig findClass "worker" isDefined, freeText("workerNotFound"))
+      (context system) actorOf(Props(config getClass "configReader", suiteDir,rootConfig), "ConfigReader")
+      (context system) actorOf(Props(config getClass "worker"), "Worker")
 
-  suiteDirs foreach (dir => (context system) actorOf (Props(classOf[SuiteManager], dir, rootConfig), dir name))
+      (((context system) actorOf Props(classOf[MonitorActor], 2)) /: (suiteDir getSuiteCallbacks)) {
+        case (actor, callback) =>
+          actor ! callback
+          actor
+      }
+  }
 
-  val pathListener = (context system) actorOf(Props(classOf[PathListener], suiteDir), (suiteDir name) concat "Listener")
-  val configReader = (context system) actorOf(Props(suiteConfig getClass "configReader", suiteDir,rootConfig), "ConfigReader")
-  val worker = (context system) actorOf(Props(suiteConfig getClass "worker"), "Worker")
+  (suiteDir findSubSuites()) foreach (dir => (context system) actorOf (Props(classOf[SuiteManager], dir, rootConfig), dir name))
 
-  override def receive: Receive = configure orElse stop
+  override def receive: Receive = configure orElse stop orElse status(ReadingConfig)
 
   private def configure: Receive = {
-    case parsedConfig: Scenario if suites isEmpty =>
+    case parsedConfig: Scenario if subSuites isEmpty =>
       log info (freeText("noSubSuites"), suiteDir name)
-      context become (work orElse stop)
-      worker ! parsedConfig
-    case parsedConfig: Scenario if suites nonEmpty =>
-      context become (prepare(parsedConfig) orElse stop)
+      context become (work orElse stop orElse status(Working))
+      worker foreach (_ ! parsedConfig)
+    case parsedConfig: Scenario if subSuites nonEmpty =>
+      context become (prepare(parsedConfig, subSuites) orElse stop orElse status(WaitingForSubSuite))
     case WrongSuitePath(path) =>
       self ! PoisonPill
       log error(freeText("wrongPath"), suiteDir name, path)
   }
 
-  private def prepare(parsedConfig: Scenario): Receive = {
-    case SuiteCompleted if suites isEmpty =>
-      context become (work orElse stop)
-      worker ! parsedConfig
-    case SuiteCompleted if (suites filterNot (_ eq sender())) isEmpty =>
-      worker ! parsedConfig
+  private def prepare(parsedConfig: Scenario, nonCompleted: Seq[ActorRef]): Receive = {
+    case SuiteCompleted if (nonCompleted filterNot (_ eq sender())) isEmpty =>
+      context become (work orElse stop orElse status(Working))
+      worker foreach (_ ! parsedConfig)
+    case SuiteCompleted if (nonCompleted filterNot (_ eq sender())) nonEmpty =>
+      val minusOne = nonCompleted filterNot (_ eq sender())
+      context become (prepare(parsedConfig, minusOne) orElse stop orElse status(WaitingForSubSuite))
   }
 
   private def work: Receive = {
@@ -64,11 +70,23 @@ class SuiteManager(suiteDir: Directory, rootConfig:Config) extends SystemActor {
   private def stop: Receive = {
     case Stop =>
       log warning(freeText("tryingToStopWhileWork"), suiteDir name)
-      (suites :+ self) foreach (_ ! PoisonPill)
+      (subSuites :+ self) foreach (_ ! PoisonPill)
   }
 
-  private def suites: Seq[ActorRef] = {
-    suiteDirs map (_ name) flatMap (context child)
+  private def status(status:Status):Receive = {
+    case WhatIsYourStatus => sender() ! status
   }
 
+  private def subSuites: Seq[ActorRef] = {
+    suiteDir findSubSuites() map (_ name) flatMap (context child)
+  }
+
+  private def worker = {
+    context child "Worker"
+  }
+
+
+  private def configReader = {
+    context child "ConfigReader"
+  }
 }

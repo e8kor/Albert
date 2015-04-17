@@ -3,8 +3,8 @@ package plugin.rtp.worker
 
 import akka.actor._
 import com.typesafe.config.Config
-import org.system.plugin.model.command.manage.WrongSuiteExecutor
-import org.system.plugin.model.scenario.Scenario
+import org.system.command.manage.WrongSuiteExecutor
+import org.system.model.scenario.Scenario
 import org.system.plugin.rtp.mq.{RTPProducerActor, RTPConsumerActor}
 import org.system.plugin.worker.WorkerActorPlugin
 

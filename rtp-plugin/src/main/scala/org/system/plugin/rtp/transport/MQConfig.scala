@@ -3,7 +3,7 @@ package org.system.plugin.rtp.transport
 import java.net.URL
 
 import org.system.{Password, Username}
-import org.system.plugin.model.config.TransportConfig
+import org.system.model.config.TransportConfig
 
 import scala.concurrent.duration.Duration
 
