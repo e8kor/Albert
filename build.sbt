@@ -6,7 +6,7 @@ import scala.language.postfixOps
 
 lazy val thirdParties = Seq(
   "org.scalaz"  %% "scalaz-core" % "7.0.6" withSources(),
-  "com.chuusai" %% "shapeless"   % "2.0.0" withSources(),
+  "com.chuusai" %% "shapeless"   % "2.2.0-RC4" withSources(),
   "com.beachape.filemanagement" %% "schwatcher" % "0.1.5" withSources(),
   "org.apache.activemq" %  "activemq-camel" % "5.11.1" withSources(),
   "net.ceedubs"         %% "ficus"          % "1.1.2"  withSources()

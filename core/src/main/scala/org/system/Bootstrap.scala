@@ -1,7 +1,7 @@
 package org.system
 
 import akka.actor.{ActorSystem, Props}
-import org.implicits.PathOps
+import org.implicits.path2PathOps
 import org.system.core.delegat.Terminator
 import org.system.core.main.RootExecutor
 
@@ -11,6 +11,10 @@ import scala.reflect.io.Path
 class Bootstrap extends akka.kernel.Bootable {
 
   val actorSystem = ActorSystem create default("systemName")
+
+ /*
+  * TODO  Decide to create validation for project home directory
+  */
 
   override def startup() {
     prepareCamel(actorSystem)
