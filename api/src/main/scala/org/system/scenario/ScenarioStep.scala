@@ -1,19 +1,19 @@
 package org.system.scenario
 
-import org.system.{ActionType, Description, StepId}
+import org.system.{Description, StepId}
 
 /**
  * Created by evgeniikorniichuk on 23/03/15.
  */
-trait ScenarioStep[T <: ScenarioStep] {
+trait ScenarioStep[T <: ScenarioStep[T]] {
   self:T =>
+
+  type Action <: ScenarioAction[Action]
 
   def id:StepId
 
-  def tpe:ActionType
-
   def description:Description
 
-  def action:ScenarioAction
+  def action:Action
 
 }

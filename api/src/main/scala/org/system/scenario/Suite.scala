@@ -10,13 +10,15 @@ import scala.reflect.io.File
  */
 trait Suite {
 
+  type T <: Scenario[T]
+
   def config:Config
 
   def transport:Map[TransportId,ScenarioTransport]
 
   def transportConfigurations:Map[TransportConfigId,TransportConfiguration]
 
-  def scenario:Scenario
+  def scenario:T
 
   def data:Map[FileId, File]
 

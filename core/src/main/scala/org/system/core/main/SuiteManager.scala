@@ -19,6 +19,8 @@ import scala.reflect.io.Directory
 
 class SuiteManager(suiteDir: Directory, rootConfig:Config) extends SystemActor {
 
+  type PluginScenario = Scenario[_]
+
   require(suiteDir suiteConfig() isDefined, freeText("suiteConfigNotFound"))
 
   suiteDir suiteConfig() map(_ withFallback rootConfig) foreach {
@@ -41,18 +43,18 @@ class SuiteManager(suiteDir: Directory, rootConfig:Config) extends SystemActor {
   override def receive: Receive = configure orElse stop orElse status(ReadingConfig)
 
   private def configure: Receive = {
-    case parsedConfig: Scenario if subSuites isEmpty =>
+    case parsedConfig: PluginScenario if subSuites isEmpty =>
       log info (freeText("noSubSuites"), suiteDir name)
       context become (work orElse stop orElse status(Working))
       worker foreach (_ ! parsedConfig)
-    case parsedConfig: Scenario if subSuites nonEmpty =>
+    case parsedConfig: PluginScenario if subSuites nonEmpty =>
       context become (prepare(parsedConfig, subSuites) orElse stop orElse status(WaitingForSubSuite))
     case WrongSuitePath(path) =>
       self ! PoisonPill
       log error(freeText("wrongPath"), suiteDir name, path)
   }
 
-  private def prepare(parsedConfig: Scenario, nonCompleted: Seq[ActorRef]): Receive = {
+  private def prepare(parsedConfig: PluginScenario, nonCompleted: Seq[ActorRef]): Receive = {
     case SuiteCompleted if (nonCompleted filterNot (_ eq sender())) isEmpty =>
       context become (work orElse stop orElse status(Working))
       worker foreach (_ ! parsedConfig)

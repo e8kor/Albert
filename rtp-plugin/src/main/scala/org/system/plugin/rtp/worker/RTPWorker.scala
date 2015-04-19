@@ -27,7 +27,7 @@ class RTPWorker() extends WorkerActorPlugin {
     case Terminated(actorRef) ⇒
       log info freeText("terminatingWorker")
       self ! PoisonPill
-    case eSuite:Scenario =>
+    case eSuite:Scenario[_] =>
       implicit val eConfig = (eSuite) // TODO ability to parse scenario
 
   }
