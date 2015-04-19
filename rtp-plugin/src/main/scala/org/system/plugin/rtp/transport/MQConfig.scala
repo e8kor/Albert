@@ -1,9 +1,8 @@
 package org.system.plugin.rtp.transport
 
 import java.net.URL
-
+import org.system.scenario.TransportConfiguration
 import org.system.{Password, Username}
-import org.system.model.config.TransportConfig
 
 import scala.concurrent.duration.Duration
 
@@ -21,4 +20,4 @@ case class MQConfig(
                       password: Password,
                       encoding: String,
                       waitTime: Duration
-                      ) extends TransportConfig
+                      ) extends TransportConfiguration

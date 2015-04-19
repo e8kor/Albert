@@ -4,9 +4,9 @@ package plugin.rtp.worker
 import akka.actor._
 import com.typesafe.config.Config
 import org.system.command.manage.WrongSuiteExecutor
-import org.system.model.scenario.Scenario
 import org.system.plugin.rtp.mq.{RTPProducerActor, RTPConsumerActor}
 import org.system.plugin.worker.WorkerActorPlugin
+import org.system.scenario.Scenario
 
 import scala.language.postfixOps
 import scala.util.Try

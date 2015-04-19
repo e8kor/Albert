@@ -2,8 +2,8 @@ package org.system
 package plugin.rtp.reader
 
 import com.typesafe.config.Config
-import org.system.model.scenario.Scenario
 import org.system.plugin.reader.ReaderActorPlugin
+import org.system.scenario.Scenario
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory

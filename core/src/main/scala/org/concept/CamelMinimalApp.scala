@@ -25,6 +25,8 @@ object CamelMinimalApp extends App {
     }
   }
 
+  def instance = this
+
   implicit val config = ConfigFactory load()
 
   val actorSystem = ActorSystem("CamelTesting")

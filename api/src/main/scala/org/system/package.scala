@@ -57,9 +57,17 @@ package object system {
 
   trait TransportType extends Type
 
-  trait State
+  trait ActionType extends Type
 
-  type ID = String
+  sealed trait Id
+
+  trait StepId extends Id
+
+  trait FileId extends Id
+
+  trait TransportId extends Id
+
+  trait TransportConfigId extends Id
 
   type Description = String
 

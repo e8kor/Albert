@@ -4,13 +4,20 @@ import Resolver.{sonatypeRepo, typesafeRepo}
 
 import scala.language.postfixOps
 
-lazy val thirdParties = Seq(
-  "org.scalaz"  %% "scalaz-core" % "7.0.6" withSources(),
-  "com.chuusai" %% "shapeless"   % "2.2.0-RC4" withSources(),
-  "com.beachape.filemanagement" %% "schwatcher" % "0.1.5" withSources(),
-  "org.apache.activemq" %  "activemq-camel" % "5.11.1" withSources(),
-  "net.ceedubs"         %% "ficus"          % "1.1.2"  withSources()
+lazy val poi = Seq(
+  "org.apache.poi" %  "poi"            % "3.12-beta1" withSources(),
+  "org.apache.poi" %  "poi-ooxml"      % "3.12-beta1" withSources(),
+  "info.folone"    %% "poi-scala"      % "0.14" withSources()
 )
+
+lazy val thirdParties = Seq(
+  "org.scalaz"                  %% "scalaz-core"    % "7.1.1" withSources(),
+  "org.scalaz.stream"           %% "scalaz-stream"  % "0.7a" withSources(),
+  "com.chuusai"                 %% "shapeless"      % "2.2.0-RC4" withSources(),
+  "com.beachape.filemanagement" %% "schwatcher"     % "0.1.5" withSources(),
+  "org.apache.activemq"         %  "activemq-camel" % "5.11.1" withSources(),
+  "net.ceedubs"                 %% "ficus"          % "1.1.2"  withSources()
+) ++ poi
 
 lazy val scalaLibraries = Seq(
   "org.scala-lang" % "scala-reflect" % "2.11.6" withSources()
@@ -27,8 +34,8 @@ lazy val akka = Seq(
 )
 
 lazy val typesafe = Seq(
-  "com.typesafe"                %  "config"        % "1.2.0" withSources(),
-  "com.typesafe.scala-logging"  %% "scala-logging" % "3.1.0" withSources()
+  "com.typesafe"               %  "config"        % "1.2.0" withSources(),
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" withSources()
 )
 
 lazy val unitTest = Seq(
@@ -38,7 +45,7 @@ lazy val unitTest = Seq(
 
 val commonSettings = buildInfoSettings ++ Seq (
   scalaVersion in ThisBuild := "2.11.6",
-  resolvers ++= (Seq("snapshots", "releases") map sonatypeRepo) ++ (Seq("snapshots", "releases", "repo") map typesafeRepo),
+  resolvers ++= (Seq("snapshots", "releases") map sonatypeRepo) ++ (Seq("snapshots", "releases", "repo") map typesafeRepo) :+ ("Scalaz Bintray Repo" at "https://dl.bintray.com/scalaz/releases"),
   libraryDependencies ++= thirdParties ++ akka ++ typesafe ++ unitTest,
   buildInfoPackage := "org.system.info",
   buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion),
@@ -65,4 +72,3 @@ lazy val core = project in file("core") settings ( commonSettings :_*) dependsOn
 lazy val api = project in file("api") settings ( macroSettings ++ commonSettings :_*)
 
 lazy val test = project in file("test") settings ( macroSettings ++ commonSettings:_*) dependsOn macros
-

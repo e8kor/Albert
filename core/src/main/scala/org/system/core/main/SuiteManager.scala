@@ -8,7 +8,7 @@ import com.typesafe.config.Config
 import org.implicits.{config2ConfigOps, dir2DirOps, path2PathOps}
 import org.system.command.manage._
 import org.system.command.status.{ReadingConfig, Status, WaitingForSubSuite, Working}
-import org.system.model.scenario.Scenario
+import org.system.scenario.Scenario
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
