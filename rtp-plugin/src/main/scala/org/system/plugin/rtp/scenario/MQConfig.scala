@@ -1,4 +1,4 @@
-package org.system.plugin.rtp.transport
+package org.system.plugin.rtp.scenario
 
 import java.net.URL
 import org.system.scenario.TransportConfiguration
