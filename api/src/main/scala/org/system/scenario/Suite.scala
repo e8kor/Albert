@@ -8,9 +8,10 @@ import scala.reflect.io.File
 /**
  * Created by evgeniikorniichuk on 22/03/15.
  */
-trait Suite {
-
-  type T <: Scenario[T]
+trait Suite[SelfType <: Suite[SelfType]] {
+  self:SelfType=>
+  
+  type SuiteScenario <: Scenario[SuiteScenario]
 
   def config:Config
 
@@ -18,7 +19,7 @@ trait Suite {
 
   def transportConfigurations:Map[TransportConfigId,TransportConfiguration]
 
-  def scenario:T
+  def scenario:SuiteScenario
 
   def data:Map[FileId, File]
 

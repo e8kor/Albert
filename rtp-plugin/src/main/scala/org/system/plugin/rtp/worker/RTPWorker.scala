@@ -5,6 +5,7 @@ import akka.actor._
 import com.typesafe.config.Config
 import org.system.command.manage.WrongSuiteExecutor
 import org.system.plugin.rtp.mq.{RTPProducerActor, RTPConsumerActor}
+import org.system.plugin.rtp.scenario.RTPScenario
 import org.system.plugin.worker.WorkerActorPlugin
 import org.system.scenario.Scenario
 
@@ -15,6 +16,8 @@ import scala.util.Try
  * Created by nutscracker on 6/30/2014.
  */
 class RTPWorker() extends WorkerActorPlugin {
+
+  type PluginScenario = RTPScenario
 
   context watch (context parent)
 

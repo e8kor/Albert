@@ -3,6 +3,7 @@ package plugin.rtp.reader
 
 import com.typesafe.config.Config
 import org.system.plugin.reader.ReaderActorPlugin
+import org.system.plugin.rtp.scenario.RTPScenario
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
@@ -12,6 +13,7 @@ import scala.reflect.io.Directory
  */
 class RTPConfigReader(dir: Directory, suiteConfig:Config) extends ReaderActorPlugin {
 
+  type PluginScenario = RTPScenario
 // TODO expect message to reread configuration
   override def receive = normal
 
