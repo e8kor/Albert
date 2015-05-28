@@ -9,7 +9,7 @@ import scala.reflect.io.File
 /**
  * Created by evgeniikorniichuk on 19/04/15.
  */
-class RTPSuite extends Suite[RTPSuite]{
+class RTPSuite() extends Suite[RTPSuite]{
 
   override type SuiteScenario = RTPScenario
 
@@ -22,4 +22,5 @@ class RTPSuite extends Suite[RTPSuite]{
   override def transportConfigurations: Map[TransportConfigId, TransportConfiguration] = ???
 
   override def transport: Map[TransportId, ScenarioTransport] = ???
+
 }
