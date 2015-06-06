@@ -2,6 +2,7 @@ package org.utils
 
 import java.nio.file.{Path => JavaPath}
 
+import scala.language.postfixOps
 import scala.reflect.io.{Directory, File, Path => ScalaPath}
 /**
  * Created by evgeniikorniichuk on 17/04/15.

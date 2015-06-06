@@ -38,7 +38,10 @@ class SuiteManager(suiteDir: Directory, rootConfig:Config) extends SystemActor {
       }
   }
 
-  (suiteDir findSubSuites()) foreach (dir => (context system) actorOf (Props(classOf[SuiteManager], dir, rootConfig), dir name))
+  (suiteDir findSubSuites()) foreach {
+    dir =>
+      (context system) actorOf(Props(classOf[SuiteManager], dir, rootConfig), dir name)
+  }
 
   override def receive: Receive = configure orElse stop orElse status(ReadingConfig)
 
@@ -55,10 +58,10 @@ class SuiteManager(suiteDir: Directory, rootConfig:Config) extends SystemActor {
   }
 
   private def prepare(parsedConfig: PluginScenario, nonCompleted: Seq[ActorRef]): Receive = {
-    case SuiteCompleted if (nonCompleted filterNot (_ eq sender())) isEmpty =>
+    case SuiteCompleted if nonCompleted forall (_ eq sender()) =>
       context become (work orElse stop orElse status(Working))
       worker foreach (_ ! parsedConfig)
-    case SuiteCompleted if (nonCompleted filterNot (_ eq sender())) nonEmpty =>
+    case SuiteCompleted if nonCompleted exists (_ != sender()) =>
       val minusOne = nonCompleted filterNot (_ eq sender())
       context become (prepare(parsedConfig, minusOne) orElse stop orElse status(WaitingForSubSuite))
   }

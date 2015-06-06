@@ -3,10 +3,13 @@ package core
 package main
 
 import akka.actor._
+import akka.camel.CamelExtension
 import org.implicits.dir2DirOps
 import org.system.core.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
 import org.system.command.manage.SuiteCompleted
 
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
@@ -19,12 +22,20 @@ class RootExecutor(rootDir: Directory) extends SystemActor {
 
   rootDir rootConfig() foreach {
     config =>
+      import context.system
       (rootDir findSubSuites()) foreach {
         dir =>
-          (context system) actorOf(Props(classOf[SuiteManager], dir, config), dir name)
+          system actorOf(Props(classOf[SuiteManager], dir, config), dir name)
       }
-      (context system) actorOf(Props(classOf[CommandConsumerSystemActor]), "CommandConsumer")
-      (context system) actorOf(Props(classOf[CommandProducerSystemActor]), "CommandProducer")
+
+      system actorOf(Props(classOf[CommandProducerSystemActor]), "CommandProducer")
+
+      val camel = CamelExtension get system
+      val endpointRef = system actorOf(Props(classOf[CommandConsumerSystemActor]), "CommandConsumer")
+      val endpointF = (camel activationFutureFor endpointRef)(10 seconds, system dispatcher)
+
+      Await ready(endpointF, 10 seconds)
+
   }
 
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
@@ -36,12 +47,12 @@ class RootExecutor(rootDir: Directory) extends SystemActor {
   override def receive = awaitCompletion(subSuites)
 
   private def awaitCompletion(subSuites: Seq[ActorRef]): Receive = {
-    case SuiteCompleted if (subSuites filterNot (_ eq sender())) isEmpty =>
+    case SuiteCompleted if subSuites forall (_ eq sender()) =>
       self ! PoisonPill
       log info freeText("allSuitesFinished")
       (context system) shutdown()
       log info freeText("shuttingDown")
-    case SuiteCompleted if (subSuites filterNot (_ eq sender())) nonEmpty =>
+    case SuiteCompleted if !(subSuites forall (_ eq sender())) =>
       context become awaitCompletion(subSuites filterNot (_ eq sender()))
   }
 

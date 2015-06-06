@@ -3,6 +3,7 @@ package org.utils
 import com.typesafe.config.Config
 import org.system._
 
+import scala.language.postfixOps
 import scala.util.Try
 
 /**

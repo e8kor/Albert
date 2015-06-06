@@ -1,10 +1,10 @@
 package org
 
 import com.typesafe.config.Config
-import org.utils.{ConfigOps, FileOps, DirectoryOps, PathOps}
+import org.utils.{ConfigOps, DirectoryOps, FileOps, PathOps}
 
-import scala.language.postfixOps
-import scala.reflect.io.{File, Directory}
+import scala.language.{implicitConversions, postfixOps}
+import scala.reflect.io.{Directory, File}
 
 /**
  * Created by evgeniikorniichuk on 24/03/15.

@@ -8,6 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.system
 import org.system._
 
+import scala.language.postfixOps
 import scala.reflect.io.{Directory, File, Path}
 
 /**

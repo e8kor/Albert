@@ -15,13 +15,13 @@ lazy val mainLibraries = Seq(
   "com.typesafe" % "config" % "1.2.0" withSources(),
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" withSources()
 ) ++ Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.3.9" withSources(),
-  "com.typesafe.akka" %% "akka-contrib" % "2.3.9" withSources(),
-  "com.typesafe.akka" %% "akka-remote" % "2.3.9" withSources(),
-  "com.typesafe.akka" %% "akka-camel" % "2.3.9" withSources(),
-  "com.typesafe.akka" %% "akka-kernel" % "2.3.9" withSources()
+  "com.typesafe.akka" %% "akka-actor" % "2.3.11" withSources(),
+  "com.typesafe.akka" %% "akka-contrib" % "2.3.11" withSources(),
+  "com.typesafe.akka" %% "akka-remote" % "2.3.11" withSources(),
+  "com.typesafe.akka" %% "akka-camel" % "2.3.11" withSources(),
+  "com.typesafe.akka" %% "akka-kernel" % "2.3.11" withSources()
 ) ++ Seq(
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.9" % "test" withSources()
+  "com.typesafe.akka" %% "akka-testkit" % "2.3.11" % "test" withSources()
 ) ++ Seq(
   "org.scalamock" %% "scalamock-scalatest-support" % "3.2" % "test" withSources(),
   "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test" withSources()
@@ -45,12 +45,16 @@ val commonSettings = buildInfoSettings ++ Seq(
   sourceGenerators in Compile <+= buildInfo
 )
 
+val sparkSettings = commonSettings ++ Seq(
+  libraryDependencies ++= mainLibraries,
+  buildInfoPackage := "org.system.spark.info"
+)
+
 val rtpSettings = commonSettings ++ Seq(
   libraryDependencies ++= rtpLibraries
 )
 
 val macroSettings = commonSettings ++ Seq(
-  libraryDependencies ++= mainLibraries,
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross (CrossVersion full))
 )
 
@@ -67,5 +71,7 @@ lazy val macros = project in file("macros") settings (macroSettings: _*)
 lazy val core = project in file("core") settings (commonSettings: _*) dependsOn api
 
 lazy val api = project in file("api") settings (macroSettings: _*)
+
+lazy val spark = project in file("spark") settings (sparkSettings: _*)
 
 lazy val test = project in file("test") settings (macroSettings: _*) dependsOn macros
