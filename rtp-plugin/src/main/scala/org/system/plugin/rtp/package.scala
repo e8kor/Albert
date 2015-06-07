@@ -1,8 +1,10 @@
 package org.system.plugin
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.language.postfixOps
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 /**
  * Created by evgeniikorniichuk on 01/05/15.
@@ -26,12 +28,14 @@ package object rtp {
 
   def lookForValue[T: ClassTag](path: String)(implicit config: Config): T = {
     val typeTag = classTag[T] runtimeClass
+    val stringClass = classOf[String]
+    val listClass = classOf[List[String]]
 
-    val result = if ((typeTag isInstanceOf)[String]) {
-      config getString path
-    } else if ((typeTag isInstanceOf)[List[String]]) {
-      config getStringList path
+    val result = typeTag match {
+      case `stringClass` => config getString path
+      case `listClass` => config getStringList path
     }
+
     (result asInstanceOf)[T]
   }
 

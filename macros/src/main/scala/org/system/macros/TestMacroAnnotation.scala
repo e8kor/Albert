@@ -10,7 +10,7 @@ import scala.reflect.macros.whitebox
  */
 class TestMacroAnnotation extends StaticAnnotation {
 
-  def macroTransform(annottees: Any*) = macro TestMacroAnnotation.impl
+  def macroTransform(annottees: Any*):Any = macro TestMacroAnnotation.impl
 
 }
 

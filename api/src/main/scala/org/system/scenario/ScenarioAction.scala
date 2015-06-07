@@ -1,6 +1,6 @@
 package org.system.scenario
 
-import org.system.ActionType
+import org.system.types.ActionType
 
 import scala.concurrent.Future
 

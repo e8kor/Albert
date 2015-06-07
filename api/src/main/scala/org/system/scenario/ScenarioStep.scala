@@ -1,6 +1,6 @@
 package org.system.scenario
 
-import org.system.{Description, StepId}
+import org.system.types.{Description, StepId}
 
 /**
  * Created by evgeniikorniichuk on 23/03/15.

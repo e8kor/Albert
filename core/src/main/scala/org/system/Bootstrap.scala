@@ -2,8 +2,8 @@ package org.system
 
 import akka.actor.ActorSystem
 import akka.kernel.Bootable
-import org.system.core.delegat.Terminator
-import org.system.core.main.RootExecutor
+import org.system.core.actors.delegat.Terminator
+import org.system.core.actors.main.RootExecutor
 
 import scala.language.postfixOps
 
@@ -16,19 +16,19 @@ trait BootstrapComponent extends Bootable {
 
   def actorSystem: ActorSystem
 
-  override def startup() {
+  override def startup(): Unit = {
     prepareCamel(actorSystem)
 
     val rootRef = actorSystem actorOf(
       Props(classOf[RootExecutor], Path(default("rootDir")) dirOrParentDir()),
       default("rootActor"))
 
-    actorSystem actorOf(
+    val termRef = actorSystem actorOf(
       Props(classOf[Terminator], rootRef),
       default("terminatorActor"))
   }
 
-  override def shutdown() {
+  override def shutdown(): Unit = {
     actorSystem shutdown()
     sys exit 0
   }

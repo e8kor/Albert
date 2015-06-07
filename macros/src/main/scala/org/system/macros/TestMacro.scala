@@ -7,7 +7,7 @@ import scala.language.experimental.macros
  * Created by evgeniikorniichuk on 12/03/15.
  */
 class TestMacro {
-  def macroMethod() = macro TestMacro.impl
+  def macroMethod():String = macro TestMacro.impl
 }
 
 object TestMacro {

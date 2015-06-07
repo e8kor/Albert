@@ -2,7 +2,7 @@ package org.system.scenario
 
 import java.net.URL
 
-import org.system.{Password, Username}
+import org.system.types.{Password, Username}
 
 import scala.concurrent.duration.Duration
 

@@ -1,5 +1,6 @@
 package org.system
 package core
+package actors
 package main
 
 import akka.actor.{ActorRef, PoisonPill, Props}
@@ -8,6 +9,7 @@ import com.typesafe.config.Config
 import org.implicits.{config2ConfigOps, dir2DirOps, path2PathOps}
 import org.system.command.manage._
 import org.system.command.status.{ReadingConfig, Status, WaitingForSubSuite, Working}
+import org.system.core.actors.SystemActor
 import org.system.scenario.Scenario
 
 import scala.language.postfixOps
@@ -43,7 +45,11 @@ class SuiteManager(suiteDir: Directory, rootConfig:Config) extends SystemActor {
       (context system) actorOf(Props(classOf[SuiteManager], dir, rootConfig), dir name)
   }
 
-  override def receive: Receive = configure orElse stop orElse status(ReadingConfig)
+  override def receive: Receive = {
+    configure orElse
+      stop orElse
+      status(ReadingConfig):PartialFunction[Any,Unit]
+  }
 
   private def configure: Receive = {
     case parsedConfig: PluginScenario if subSuites isEmpty =>

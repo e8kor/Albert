@@ -1,7 +1,7 @@
 package org.system.scenario
 
 import com.typesafe.config.Config
-import org.system.{FileId, TransportConfigId, TransportId}
+import org.system.types.{FileId, TransportConfigId, TransportId}
 
 import scala.reflect.io.File
 

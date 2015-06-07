@@ -1,6 +1,7 @@
 package org.system
 package plugin.rtp.mq
 
+import akka.actor.Actor.Receive
 import akka.camel.CamelMessage
 import com.typesafe.config.Config
 import org.system.plugin.mq.MQConsumerPluginActor

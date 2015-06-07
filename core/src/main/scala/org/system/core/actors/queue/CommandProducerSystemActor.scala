@@ -1,7 +1,7 @@
-package org.system.core.queue
+package org.system.core.actors.queue
 
 import com.typesafe.config.Config
-import org.system.core.SystemProducerActor
+import org.system.core.actors.SystemProducerActor
 
 /**
  * Created by evgeniikorniichuk on 08.11.14.

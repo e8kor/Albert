@@ -1,6 +1,6 @@
 package org.system.scenario
 
-import org.system.StepId
+import org.system.types.StepId
 
 import scala.language.postfixOps
 

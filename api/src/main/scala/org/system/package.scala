@@ -15,12 +15,6 @@ package object system {
   import akka.actor.ActorSystem
   import com.typesafe.config.ConfigFactory
 
-  trait Validator[B] {
-
-    def validate(arg: B): Either[Throwable, B]
-
-  }
-
   private implicit val config = ConfigFactory load()
   private val freeTextNS = "system.freetext."
   private val defaultsNS = "system.defaults."
@@ -38,50 +32,22 @@ package object system {
 
   def lookForValue[T: ClassTag](path: String)(implicit config: Config): T = {
     val typeTag = classTag[T] runtimeClass
+    val stringClass = classOf[String]
+    val listClass = classOf[List[String]]
 
-    val result = if ((typeTag isInstanceOf)[String]) {
-      config getString path
-    } else if ((typeTag isInstanceOf)[List[String]]) {
-      config getStringList path
+    val result = typeTag match {
+      case `stringClass` => config getString path
+      case `listClass` => config getStringList path
     }
+
     (result asInstanceOf)[T]
   }
 
-  def prepareCamel(system: ActorSystem) {
+  def prepareCamel(system: ActorSystem): Unit = {
     val camel = CamelExtension(system)
     (camel context) removeComponent default("mqComponent")
     (camel context) addComponent (default("mqComponent"), ActiveMQComponent activeMQComponent default("mqURL"))
   }
-
-  trait Type
-
-  trait TransportType extends Type
-
-  trait ActionType extends Type
-
-  sealed trait Id
-
-  trait StepId extends Id
-
-  trait FileId extends Id
-
-  trait TransportId extends Id
-
-  trait TransportConfigId extends Id
-
-  type Description = String
-
-  type Data = String
-
-  type Input = String
-
-  type Output = String
-
-  type Username = String
-
-  type Password = String
-
-  type FileName = String
 
 }
 

@@ -1,8 +1,10 @@
-package org.system.core.delegat
+package org
+package system
+package core
+package actors
+package delegat
 
 import akka.actor.{ActorRef, Terminated}
-import org.system._
-import org.system.core._
 
 import scala.language.postfixOps
 

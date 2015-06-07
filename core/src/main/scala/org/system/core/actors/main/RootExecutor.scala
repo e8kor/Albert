@@ -1,11 +1,12 @@
 package org.system
 package core
+package actors
 package main
 
 import akka.actor._
 import akka.camel.CamelExtension
 import org.implicits.dir2DirOps
-import org.system.core.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
+import org.system.core.actors.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
 import org.system.command.manage.SuiteCompleted
 
 import scala.concurrent.Await

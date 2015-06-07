@@ -4,7 +4,7 @@ import java.net.URL
 
 import info.folone.scala.poi.Cell
 import org.system.scenario.TransportConfiguration
-import org.system.{Password, Username}
+import org.system.types.{Password, Username}
 
 import scala.concurrent.duration.Duration
 

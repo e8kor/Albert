@@ -1,6 +1,6 @@
 package org.system.plugin.rtp.scenario
 
-import org.system.ActionType
+import org.system.types.ActionType
 import org.system.scenario.ScenarioAction
 
 import scala.concurrent.Future

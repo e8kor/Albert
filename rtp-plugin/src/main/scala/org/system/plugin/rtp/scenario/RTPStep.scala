@@ -1,6 +1,6 @@
 package org.system.plugin.rtp.scenario
 
-import org.system.{Description, StepId}
+import org.system.types.{Description, StepId}
 import org.system.scenario.ScenarioStep
 
 /**

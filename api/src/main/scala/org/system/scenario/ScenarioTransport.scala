@@ -1,6 +1,6 @@
 package org.system.scenario
 
-import org.system.{TransportId, Description, TransportType}
+import org.system.types.{TransportId, Description, TransportType}
 
 /**
  * Created by evgeniikorniichuk on 23/03/15.

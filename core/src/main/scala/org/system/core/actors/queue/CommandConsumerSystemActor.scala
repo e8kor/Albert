@@ -1,9 +1,11 @@
-package org.system.core.queue
+package org
+package system
+package core
+package actors
+package queue
 
 import akka.camel.CamelMessage
 import com.typesafe.config.Config
-import org.system._
-import org.system.core.SystemConsumerActor
 
 import scala.language.postfixOps
 

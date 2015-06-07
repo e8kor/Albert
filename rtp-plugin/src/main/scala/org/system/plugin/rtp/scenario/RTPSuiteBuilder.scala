@@ -8,15 +8,13 @@ import com.typesafe.scalalogging.LazyLogging
 import info.folone.scala.poi._
 
 import scala.language.{higherKinds, postfixOps}
+import scala.math.Ordering
 import scala.reflect.io.Directory
 
 /**
  * Created by evgeniikorniichuk on 20/04/15.
  */
 object RTPSuiteBuilder {
-
-  import scalaz._
-  import Scalaz._
 
   sealed case class AbsentSheet(name: String) {
     override def toString = {
@@ -25,6 +23,10 @@ object RTPSuiteBuilder {
   }
 
   trait RTPSheet {
+
+    import scalaz._
+    import Scalaz._
+
     def name: String
 
     def validate(book: Workbook): AbsentSheet \/ Sheet = {
@@ -35,6 +37,8 @@ object RTPSuiteBuilder {
   }
 
   object TransportSheet extends RTPSheet {
+    import scalaz.\/
+
     val name = "Transport"
 
     def cellValue(cell: Cell): Any = {
@@ -47,7 +51,7 @@ object RTPSuiteBuilder {
       }
     }
 
-    def set2SortedSeq[A](cells: Set[A]): Seq[A] = {
+    def set2SortedSeq[A: Ordering](cells: Set[A]): Seq[A] = {
       (cells toList) sorted
     }
 
@@ -61,14 +65,22 @@ object RTPSuiteBuilder {
       } yield (cell asInstanceOf)[StringCell]
     }
 
-    def apply(book: Workbook) = {
-      for {
-        sheet <- validate(book)
-        row <- set2SortedSeq(sheet rows)
-        cells = set2SortedSeq(row cells)
-        stringCells = stringCellsFromRow(cells)
-      } yield getValuesForStringCells(stringCells)
-
+    def apply(book: Workbook): AbsentSheet \/ Seq[Seq[String]] = {
+      val rows = validate(book) map {
+        sheet =>
+          set2SortedSeq(sheet rows)
+      } map {
+        rows =>
+          rows map {
+            row =>
+              getValuesForStringCells(
+                stringCellsFromRow(
+                  set2SortedSeq(row cells)
+                )
+              )
+          }
+      }
+      rows
     }
 
   }
@@ -104,7 +116,6 @@ case class RTPSuiteBuilder(config: Config, dir: Directory) extends LazyLogging {
       logger error("Unable to open xls file", exception),
     workbook => {
       logger info("Workbook parsed successfully", workbook)
-
 
     })
 

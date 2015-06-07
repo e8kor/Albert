@@ -4,7 +4,7 @@ package test
 import akka.actor.Props
 import akka.camel.CamelMessage
 import akka.testkit.TestProbe
-import org.system.core.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
+import org.system.core.actors.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
 import org.system.test.spec.{Message, SystemActorSpec}
 
 import scala.language.postfixOps
