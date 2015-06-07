@@ -1,12 +1,10 @@
-organization in Global := "system.albert"
+name := "albert"
+
+organization in Global := "org.system"
 
 scalaVersion in Global := "2.11.6"
 
 crossScalaVersions in Global := Seq("2.11.6", "2.10.5")
-
-(common buildInfoPackagePath) := "org.system.info"
-
-(common buildInfoPluginSettings)
 
 scalacOptions in Global := Seq(
   "-deprecation",
@@ -26,20 +24,20 @@ scalacOptions in Global := Seq(
 
 licenses in Global +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
-lazy val albert = project in file(".") enablePlugins BuildInfoPlugin aggregate( api, core, `rtp-plugin`, test, macros, spark)
+lazy val albert = project in file(".") enablePlugins BuildInfoPlugin aggregate( api, core, rtp, test, macros, spark)
 
-lazy val api = project
+lazy val api = project enablePlugins BuildInfoPlugin
 
-lazy val core = project dependsOn api
+lazy val core = project enablePlugins BuildInfoPlugin dependsOn api
 
-lazy val `rtp-plugin` = project dependsOn api
+lazy val rtp = project enablePlugins BuildInfoPlugin dependsOn api
 
-lazy val docs = project dependsOn(core, api, `rtp-plugin`)
+lazy val docs = project enablePlugins BuildInfoPlugin dependsOn(core, api, rtp)
 
-lazy val macros = project
+lazy val macros = project enablePlugins BuildInfoPlugin
 
-lazy val test = project dependsOn macros
+lazy val test = project enablePlugins BuildInfoPlugin dependsOn macros
 
-lazy val spark = project
+lazy val spark = project enablePlugins BuildInfoPlugin
 
 (common promptSettings)

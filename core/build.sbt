@@ -4,6 +4,4 @@ name := "core"
 
 (common configLibraries)
 
-(common buildInfoPackagePath) := "org.system.core.info"
-
 (common buildInfoPluginSettings)

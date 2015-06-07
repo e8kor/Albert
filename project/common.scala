@@ -110,6 +110,7 @@ object common {
   )
 
   def buildInfoPluginSettings = Seq(
+    buildInfoPackagePath := s"${organization value}.${name value}.info",
     buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion),
     buildInfoPackage := buildInfoPackagePath.value
   )

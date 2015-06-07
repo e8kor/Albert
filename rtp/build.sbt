@@ -1,4 +1,4 @@
-name := "rtp-plugin"
+name := "rtp"
 
 (common velocityLibraries)
 
@@ -11,7 +11,5 @@ name := "rtp-plugin"
 (common akkaLibraries)
 
 (common configLibraries)
-
-(common buildInfoPackagePath) := "org.system.plugin.rtp.info"
 
 (common buildInfoPluginSettings)
