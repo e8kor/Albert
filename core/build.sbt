@@ -1,5 +1,3 @@
-import common._
-
 name := "core"
 
 (common akkaLibraries)

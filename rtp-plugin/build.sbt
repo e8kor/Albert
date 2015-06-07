@@ -1,5 +1,3 @@
-import common._
-
 name := "rtp-plugin"
 
 (common velocityLibraries)
