@@ -1,3 +1,0 @@
-name := "spark"
-
-(common buildInfoPluginSettings)
