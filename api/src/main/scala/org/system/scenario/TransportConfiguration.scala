@@ -6,9 +6,6 @@ import org.system.types.{Password, Username}
 
 import scala.concurrent.duration.Duration
 
-/**
- * Created by evgeniikorniichuk on 23/03/15.
- */
 trait TransportConfiguration {
 
   def url: URL

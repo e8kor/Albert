@@ -8,38 +8,38 @@ import com.typesafe.scalalogging.LazyLogging
 import info.folone.scala.poi._
 
 import scala.language.{higherKinds, postfixOps}
-import scala.math.Ordering
 import scala.reflect.io.Directory
 
-/**
- * Created by evgeniikorniichuk on 20/04/15.
- */
 object RTPSuiteBuilder {
 
-  sealed case class AbsentSheet(name: String) {
-    override def toString = {
-      freeText("sheetEmpty") format name
-    }
-  }
-
-  trait RTPSheet {
-
-    import scalaz._
-    import Scalaz._
+  sealed trait RTPSheet {
 
     def name: String
 
+  }
+
+  sealed case class AbsentSheet(name: String) extends RTPSheet {
+
+    override def toString = {
+      freeText("sheetEmpty") format name
+    }
+
+  }
+
+
+
+  object TransportSheet extends RTPSheet {
+
+    import scalaz._
+
+    val name = "Transport"
+
     def validate(book: Workbook): AbsentSheet \/ Sheet = {
+      import Scalaz._
       for {
         sheet <- ((book sheetMap) get name) \/> AbsentSheet(name)
       } yield sheet
     }
-  }
-
-  object TransportSheet extends RTPSheet {
-    import scalaz.\/
-
-    val name = "Transport"
 
     def cellValue(cell: Cell): Any = {
       cell match {
@@ -55,8 +55,12 @@ object RTPSuiteBuilder {
       (cells toList) sorted
     }
 
-    def getValuesForStringCells(seq: Seq[StringCell]): Seq[String] = {
-      seq map (cell => cell data)
+    def valuesFromStringCells(seq: Seq[StringCell]): Seq[String] = {
+      seq map stringCell2Value
+    }
+
+    def stringCell2Value(cell: StringCell): String = {
+      cell data
     }
 
     def stringCellsFromRow(seq: Seq[Cell]) = {
@@ -65,42 +69,42 @@ object RTPSuiteBuilder {
       } yield (cell asInstanceOf)[StringCell]
     }
 
+    def asStringCell(cell: Cell) = {
+       (cell asInstanceOf)[StringCell]
+    }
+
+    def isStringCell(cell:Cell) = {
+      (cell isInstanceOf)[StringCell]
+    }
+
     def apply(book: Workbook): AbsentSheet \/ Seq[Seq[String]] = {
-      val rows = validate(book) map {
-        sheet =>
-          set2SortedSeq(sheet rows)
-      } map {
-        rows =>
-          rows map {
-            row =>
-              getValuesForStringCells(
-                stringCellsFromRow(
-                  set2SortedSeq(row cells)
-                )
-              )
-          }
-      }
-      rows
+      val a:AbsentSheet \/ Seq[Seq[String]] = for {
+        sheet <- validate(book)
+        row <- set2SortedSeq(sheet rows)
+        cell <- set2SortedSeq(row cells) if isStringCell(cell)
+      } yield stringCell2Value(asStringCell(cell))
+
+      a
     }
 
   }
 
 
-  object SetupSheet extends RTPSheet {
-    val name = "Setup"
-  }
-
-  object DataSheet extends RTPSheet {
-    val name = "Data"
-  }
-
-  object TemplateSheet extends RTPSheet {
-    val name = "Template"
-  }
-
-  object ScenarioSheet extends RTPSheet {
-    val name = "Scenario"
-  }
+//  object SetupSheet extends RTPSheet {
+//    val name = "Setup"
+//  }
+//
+//  object DataSheet extends RTPSheet {
+//    val name = "Data"
+//  }
+//
+//  object TemplateSheet extends RTPSheet {
+//    val name = "Template"
+//  }
+//
+//  object ScenarioSheet extends RTPSheet {
+//    val name = "Scenario"
+//  }
 
 }
 

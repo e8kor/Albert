@@ -4,9 +4,6 @@ import org.system.types.ActionType
 
 import scala.concurrent.Future
 
-/**
- * Created by evgeniikorniichuk on 18/04/15.
- */
 trait ScenarioAction[T <: ScenarioAction[T]] {
   self:T =>
 

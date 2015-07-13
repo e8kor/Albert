@@ -54,10 +54,12 @@ object common {
   def configLibraries = Seq(
     ficusVersion := "1.1.2",
     configVersion := "1.2.0",
-    loggingVersion := "3.1.0",
+//    loggingVersion := "3.1.0",
     libraryDependencies ++= Seq(
       "com.typesafe" % "config" % configVersion.value withSources(),
-      "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion.value withSources(),
+      "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+  //      "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion.value withSources(),
       "net.ceedubs" %% "ficus" % ficusVersion.value withSources()
     )
   )

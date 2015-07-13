@@ -5,3 +5,5 @@ name := "core"
 (common configLibraries)
 
 (common buildInfoPluginSettings)
+
+(common testSettings)

@@ -7,9 +7,6 @@ import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
 
 import scala.language.postfixOps
 
-/**
- * Created by evgeniikorniichuk on 03/03/15.
- */
 class SystemActorSpec(system: ActorSystem)
   extends TestKit(system)
   with ImplicitSender
@@ -17,10 +14,10 @@ class SystemActorSpec(system: ActorSystem)
   with MustMatchers
   with BeforeAndAfterAll {
 
-  def this() = this(ActorSystem create default("systemName"))
+  def this() = this(ActorSystem create "AlbertTest")
 
   override def beforeAll() {
-    prepareCamel(system)
+    //    prepareCamel(system)(ConfigFactory load())
   }
 
   override def afterAll() {
@@ -28,5 +25,3 @@ class SystemActorSpec(system: ActorSystem)
   }
 
 }
-
-case class Message(test: String)

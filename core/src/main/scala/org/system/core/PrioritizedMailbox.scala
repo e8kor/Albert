@@ -5,9 +5,6 @@ import akka.actor.ActorSystem
 import akka.dispatch.{PriorityGenerator, UnboundedPriorityMailbox}
 import com.typesafe.config.Config
 
-/**
- * Created by nutscracker on 10/5/2014.
- */
 /*
  * TODO Prioritized mailbox must filter commands cross application
  */

@@ -6,19 +6,25 @@ package queue
 
 import akka.camel.CamelMessage
 import com.typesafe.config.Config
+import org.system.core.actors.System.SystemConsumerActor
 
 import scala.language.postfixOps
 
 /**
  * Created by evgeniikorniichuk on 08.11.14.
  */
-class CommandConsumerSystemActor(
-                                override val endpointUri: String
-                                ) extends SystemConsumerActor {
 
-  def this(suiteConfig:Config) {
-    this(suiteConfig getString "commandConsumerUrl")
+object CommandConsumerSystemActor {
+
+  def apply()(implicit config: Config) = {
+    new CommandConsumerSystemActor(config getString "commandConsumerUrl")
   }
+
+}
+
+class CommandConsumerSystemActor(
+                                  override val endpointUri: String
+                                  )(implicit config: Config) extends SystemConsumerActor {
 
   override def receive: Receive = normal
 
@@ -26,7 +32,7 @@ class CommandConsumerSystemActor(
     case message: CamelMessage =>
       log info (message toString())
       (context parent) ! message
-    case default => sys error freeText("unsupportedType")
+    case default => sys error s"message not supported - $default"
   }
 
 }

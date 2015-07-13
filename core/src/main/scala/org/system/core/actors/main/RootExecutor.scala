@@ -5,68 +5,97 @@ package main
 
 import akka.actor._
 import akka.camel.CamelExtension
-import org.implicits.dir2DirOps
+import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.activemq.camel.component.ActiveMQComponent
+import org.implicits.{config2ConfigOps, dir2DirOps}
+import org.system.command.manage.{StartSuite, SuiteCompleted}
+import org.system.core.actors.System.SystemActor
 import org.system.core.actors.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
-import org.system.command.manage.SuiteCompleted
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
-/**
- * Created by nutscracker on 6/30/2014.
- */
-class RootExecutor(rootDir: Directory) extends SystemActor {
+object RootExecutor {
 
-  require(rootDir rootConfig() isDefined, freeText("illegalPath"))
+  def apply(rootConfig: Config) = {
 
-  rootDir rootConfig() foreach {
-    config =>
-      import context.system
-      (rootDir findSubSuites()) foreach {
-        dir =>
-          system actorOf(Props(classOf[SuiteManager], dir, config), dir name)
-      }
+    val optRootDir = rootConfig findDirectory "root_directory"
 
-      system actorOf(Props(classOf[CommandProducerSystemActor]), "CommandProducer")
+    val suiteDirs = optRootDir map (_ zipDirsByFile "suite.conf") getOrElse Seq()
 
-      val camel = CamelExtension get system
-      val endpointRef = system actorOf(Props(classOf[CommandConsumerSystemActor]), "CommandConsumer")
-      val endpointF = (camel activationFutureFor endpointRef)(10 seconds, system dispatcher)
+    require(optRootDir isDefined,
+      s"""illegal config: root execution directory not found
+          |passed config: $rootConfig""")
 
-      Await ready(endpointF, 10 seconds)
+    require(suiteDirs nonEmpty,
+      """illegal config: no suites found
+        |passed config: $rootCfg""")
 
+    new RootExecutor(optRootDir orNull, suiteDirs)(rootConfig)
   }
+}
+
+class RootExecutor private(val rootDirectory: Directory, val suiteDirectories: Seq[(Directory, Config)])(implicit val rootConfig: Config) extends SystemActor {
+
+  import context.{become, system}
 
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
     case thr: Throwable =>
-      log error(thr, freeText("tryRestart"), thr)
+      log error(thr, "going to restart")
       SupervisorStrategy restart
   }
 
-  override def receive = awaitCompletion(subSuites)
+  if (rootConfig getBoolean "camel_enabled") {
+    prepareCamel(system)
+    val camel = CamelExtension get system
+    val producerRef = context actorOf(Props[CommandProducerSystemActor](CommandProducerSystemActor()(rootConfig)), "CommandProducer")
+    val consumerRef = context actorOf(Props[CommandConsumerSystemActor](CommandConsumerSystemActor()(rootConfig)), "CommandConsumer")
+    val endpointF = (camel activationFutureFor consumerRef)(10 seconds, system dispatcher)
 
-  private def awaitCompletion(subSuites: Seq[ActorRef]): Receive = {
-    case SuiteCompleted if subSuites forall (_ eq sender()) =>
+    Await ready(endpointF, 10 seconds)
+  }
+
+  val suiteRefs = suiteDirectories map {
+    case (dir, conf) =>
+      context actorOf(Props[SuiteManager]( SuiteManager(dir, conf)), dir name)
+  }
+
+  if (rootConfig bool "auto_start") {
+    log info s"root executor start ${suiteRefs length} suites automatically"
+    self ! StartSuite
+  } else {
+    log info s"root executor initialization completed, waiting to your command"
+  }
+
+  override def receive = awaitStart()
+
+  def awaitCompletion(completed: Seq[ActorRef]): Receive = {
+
+    case SuiteCompleted if ((completed :+ sender()) length) equals (suiteRefs length) =>
+      log info "root executor: all suites was completed"
       self ! PoisonPill
-      log info freeText("allSuitesFinished")
-      (context system) shutdown()
-      log info freeText("shuttingDown")
-    case SuiteCompleted if !(subSuites forall (_ eq sender())) =>
-      context become awaitCompletion(subSuites filterNot (_ eq sender()))
+    case SuiteCompleted =>
+      log info "root executor: one of suites completed "
+      become(awaitCompletion(completed :+ sender()))
   }
 
-  private def commandProducer = {
-    context child "CommandProducer"
+  private def awaitStart(): Receive = {
+    case StartSuite =>
+      log info s"root executor start ${suiteRefs length} suites on command"
+      context become awaitCompletion(Seq())
+      suiteRefs foreach (_ ! StartSuite)
   }
 
-  private def commandConsumer = {
-    context child "CommandConsumer"
-  }
+  //  private def commandProducer = child("CommandProducer")
 
-  private def subSuites: Seq[ActorRef] = {
-    rootDir findSubSuites() map (_ name) flatMap (context child)
-  }
+  //  private def commandConsumer = child("CommandConsumer")
 
+  private def prepareCamel(system: ActorSystem)(implicit config: Config) = {
+    val camel = CamelExtension(system)
+    (camel context) removeComponent ??? /* TODO : need to provide properly default("mqComponent")*/
+    (camel context) addComponent(??? /* TODO : need to provide properly default("mqComponent")*/ , ActiveMQComponent activeMQComponent ??? /* TODO : need to provide properly default("mqURL")*/ )
+    camel
+  }
 }

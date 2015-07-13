@@ -9,95 +9,93 @@ import com.typesafe.config.Config
 import org.implicits.{config2ConfigOps, dir2DirOps, path2PathOps}
 import org.system.command.manage._
 import org.system.command.status.{ReadingConfig, Status, WaitingForSubSuite, Working}
-import org.system.core.actors.SystemActor
-import org.system.scenario.Scenario
+import org.system.core.actors.System.SystemActor
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
-/**
- * Created by nutscracker on 8/2/2014.
- */
+object SuiteManager {
 
-class SuiteManager(suiteDir: Directory, rootConfig:Config) extends SystemActor {
+  def apply(suiteDir: Directory, suiteCfg: Config) = {
 
-  type PluginScenario = Scenario[_]
+    require((suiteCfg findClass "runner") isDefined,
+      s"""
+         |illegal config: suite runner not defined
+         |loaded class : ${suiteCfg findClass "runner"}
+         |passed dir: ${suiteDir path}
+         |passed config: ${suiteCfg toString}
+         |""".stripMargin)
+    new SuiteManager(suiteDir)(suiteCfg)
+  }
 
-  require(suiteDir suiteConfig() isDefined, freeText("suiteConfigNotFound"))
+}
 
-  suiteDir suiteConfig() map(_ withFallback rootConfig) foreach {
-    config =>
-      require(config findClass "configReader" isDefined, freeText("configReaderNotFound"))
-      require(config findClass "worker" isDefined, freeText("workerNotFound"))
+class SuiteManager private(suiteDir: Directory)(suiteCfg: Config) extends SystemActor {
 
-      (context system) actorOf(Props(config getClass "configReader", suiteDir,rootConfig), "ConfigReader")
-      (context system) actorOf(Props(config getClass "worker"), "Worker")
+  import context.{become, parent, system}
 
-      (((context system) actorOf Props(classOf[MonitorActor], 2)) /: (suiteDir getSuiteCallbacks)) {
-        case (actor, callback) =>
-          actor ! callback
-          actor
+  val runnerRef = context actorOf(Props(suiteCfg getClass "runner"), s"${suiteDir name}Runner")
+
+  if (suiteCfg bool "file_watch_enabled") {
+    val monitorRef = system actorOf Props(classOf[MonitorActor], 2)
+
+    (suiteDir getSuiteCallbacks) foreach {
+      callback =>
+        monitorRef ! callback
+    }
+  }
+
+  val suiteRefs = suiteDir zipDirsByFile "suite.conf" map {
+    case (dir, cfg) =>
+      context actorOf(Props[SuiteManager](SuiteManager(dir, cfg)), dir name)
+  }
+
+  log info s"suite - ${suiteDir name}: initializing ${suiteRefs length} suites"
+
+  override def receive: Receive = awaitStart
+
+  private def awaitStart: Receive = {
+    case StartSuite =>
+      if (suiteRefs isEmpty) {
+        log info "no sub suites detected: execution started"
+        runnerRef ! StartWork(suiteDir, suiteCfg)
+        become(work orElse stop orElse status(Working))
+      } else {
+        log info "sub suites detected: await for completion"
+        become(prepare(Seq()) orElse stop orElse status(ReadingConfig))
+        suiteRefs foreach (_ ! StartSuite)
       }
-  }
-
-  (suiteDir findSubSuites()) foreach {
-    dir =>
-      (context system) actorOf(Props(classOf[SuiteManager], dir, rootConfig), dir name)
-  }
-
-  override def receive: Receive = {
-    configure orElse
-      stop orElse
-      status(ReadingConfig):PartialFunction[Any,Unit]
-  }
-
-  private def configure: Receive = {
-    case parsedConfig: PluginScenario if subSuites isEmpty =>
-      log info (freeText("noSubSuites"), suiteDir name)
-      context become (work orElse stop orElse status(Working))
-      worker foreach (_ ! parsedConfig)
-    case parsedConfig: PluginScenario if subSuites nonEmpty =>
-      context become (prepare(parsedConfig, subSuites) orElse stop orElse status(WaitingForSubSuite))
-    case WrongSuitePath(path) =>
-      self ! PoisonPill
-      log error(freeText("wrongPath"), suiteDir name, path)
-  }
-
-  private def prepare(parsedConfig: PluginScenario, nonCompleted: Seq[ActorRef]): Receive = {
-    case SuiteCompleted if nonCompleted forall (_ eq sender()) =>
-      context become (work orElse stop orElse status(Working))
-      worker foreach (_ ! parsedConfig)
-    case SuiteCompleted if nonCompleted exists (_ != sender()) =>
-      val minusOne = nonCompleted filterNot (_ eq sender())
-      context become (prepare(parsedConfig, minusOne) orElse stop orElse status(WaitingForSubSuite))
   }
 
   private def work: Receive = {
     case WorkCompleted =>
+      log info s"work completed: suite - ${suiteDir name}"
+      log info
+        s"""sending completion status to partner by :
+            |path : ${(parent path) toString}
+         """.stripMargin
+      parent ! SuiteCompleted
       self ! PoisonPill
-      (context parent) ! SuiteCompleted
+  }
+
+  private def prepare(completed: Seq[ActorRef]): Receive = {
+    case SuiteCompleted if (suiteRefs length) equals (completed :+ sender() length) =>
+      log info s"all sub suites complete their work, suite - ${suiteDir name}"
+      become(work orElse stop orElse status(Working))
+      runnerRef ! StartWork(suiteDir, suiteCfg)
+    case SuiteCompleted =>
+      log info s"one of sub suites complete their work, suite - ${suiteDir name}"
+      become(prepare(completed :+ sender()) orElse stop orElse status(WaitingForSubSuite))
   }
 
   private def stop: Receive = {
     case Stop =>
-      log warning(freeText("tryingToStopWhileWork"), suiteDir name)
-      (subSuites :+ self) foreach (_ ! PoisonPill)
+      log warning s"trying to stop, suite - ${suiteDir name}"
+      (suiteRefs :+ self) foreach (_ ! PoisonPill)
   }
 
-  private def status(status:Status):Receive = {
+  private def status(status: Status): Receive = {
     case WhatIsYourStatus => sender() ! status
   }
 
-  private def subSuites: Seq[ActorRef] = {
-    suiteDir findSubSuites() map (_ name) flatMap (context child)
-  }
-
-  private def worker = {
-    context child "Worker"
-  }
-
-
-  private def configReader = {
-    context child "ConfigReader"
-  }
 }

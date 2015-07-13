@@ -8,10 +8,10 @@ import scala.concurrent.Future
 /**
  * Created by evgeniikorniichuk on 19/04/15.
  */
-class RTPAction extends ScenarioAction[RTPAction]{
+class RTPAction[A] extends ScenarioAction[RTPAction[A]]{
 
   override def tpe: ActionType = ???
 
-  override def execute(): Future[Unit] = ???
+  override def execute(): Future[A] = ???
 
 }

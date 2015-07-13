@@ -1,10 +1,6 @@
 package org.system.types
 
-/**
- * Created by evgeniikorniichuk on 06/06/15.
- */
-
-trait Type
+sealed trait Type
 
 trait TransportType extends Type
 

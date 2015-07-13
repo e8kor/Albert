@@ -6,7 +6,7 @@ package org.system.scenario
 
 //TODO not used know. What I really need ? Data ? Properties? Configuration?
 //TODO properties probably have same meaning as typesafe config
-@Deprecated
+@deprecated("no need in such class", "0.1-SNAPSHOT")
 trait ScenarioProperties[T <: ScenarioProperties[T]] {
   self:T =>
 

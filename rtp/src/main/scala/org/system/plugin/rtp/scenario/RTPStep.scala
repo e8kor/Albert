@@ -8,7 +8,7 @@ import org.system.scenario.ScenarioStep
  */
 class RTPStep extends ScenarioStep[RTPStep]{
 
-  override type Action = RTPAction
+  override type Action = RTPAction[_]
 
   override def action: Action = ???
 

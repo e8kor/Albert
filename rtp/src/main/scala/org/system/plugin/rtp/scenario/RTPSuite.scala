@@ -1,26 +1,21 @@
 package org.system.plugin.rtp.scenario
 
-import com.typesafe.config.Config
+import org.system.scenario.{ScenarioTransport, Suite, TransportConfiguration}
 import org.system.types.{FileId, TransportConfigId, TransportId}
-import org.system.scenario.{TransportConfiguration, ScenarioTransport, Suite}
 
 import scala.reflect.io.File
 
 /**
  * Created by evgeniikorniichuk on 19/04/15.
  */
-class RTPSuite() extends Suite[RTPSuite]{
+case class RTPSuite(
+                     config: DBConfig,
+                     scenario: RTPScenario,
+                     messages: Map[FileId, File],
+                     transportConfigurations: Map[TransportConfigId, TransportConfiguration],
+                     transport: Map[TransportId, ScenarioTransport]
+                     ) extends Suite[RTPSuite] {
 
   override type SuiteScenario = RTPScenario
-
-  override def config: Config = ???
-
-  override def scenario: SuiteScenario = ???
-
-  override def data: Map[FileId, File] = ???
-
-  override def transportConfigurations: Map[TransportConfigId, TransportConfiguration] = ???
-
-  override def transport: Map[TransportId, ScenarioTransport] = ???
 
 }

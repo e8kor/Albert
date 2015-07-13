@@ -2,9 +2,6 @@ package org.system.scenario
 
 import org.system.types.{Description, StepId}
 
-/**
- * Created by evgeniikorniichuk on 23/03/15.
- */
 trait ScenarioStep[T <: ScenarioStep[T]] {
   self:T =>
 

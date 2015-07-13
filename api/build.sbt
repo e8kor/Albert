@@ -5,3 +5,5 @@ name := "api"
 (common configLibraries)
 
 (common buildInfoPluginSettings)
+
+(common testSettings)

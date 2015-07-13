@@ -32,7 +32,7 @@ object CamelMinimalApp extends App {
   val actorSystem = ActorSystem("CamelTesting")
   val system = CamelExtension(actorSystem)
 
-  val amqUrl = org.system.default("mqURL")
+  val amqUrl = ??? // TODO need to provide URL properly org.system.default("mqURL")
   (system context) addComponent("activemq", ActiveMQComponent activeMQComponent amqUrl)
 
   val simpleConsumer = actorSystem actorOf Props[SimpleConsumer]

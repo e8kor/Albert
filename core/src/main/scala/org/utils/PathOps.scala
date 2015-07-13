@@ -25,10 +25,10 @@ class PathOps(val path: ScalaPath) extends AnyVal {
     }
   }
 
-  def filesAndDirs(forFiles: File => Unit)(forDirs: Directory => Unit): Unit = {
-    val dir = dirOrParentDir()
-    (dir files) foreach forFiles
-    (dir dirs) foreach forDirs
-  }
+//  def filesAndDirs(forFiles: File => Unit)(forDirs: Directory => Unit): Unit = {
+//    val dir = dirOrParentDir()
+//    (dir files) foreach forFiles
+//    (dir dirs) foreach forDirs
+//  }
 
 }

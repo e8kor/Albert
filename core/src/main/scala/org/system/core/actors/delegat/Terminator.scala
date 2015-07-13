@@ -5,19 +5,18 @@ package actors
 package delegat
 
 import akka.actor.{ActorRef, Terminated}
+import com.typesafe.config.Config
+import org.system.core.actors.System.SystemActor
 
 import scala.language.postfixOps
 
-/**
- * Created by nutscracker on 7/30/2014.
- */
-class Terminator(app: ActorRef) extends SystemActor {
+class Terminator(app: ActorRef)(implicit config:Config) extends SystemActor {
 
   context watch app
 
   def receive = {
     case Terminated(actorRef) ⇒
-      log info freeText("terminatingApplication")
+      log info "root executor terminated - application shutting down"
       (context system) shutdown()
   }
 

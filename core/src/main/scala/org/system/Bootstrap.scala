@@ -2,6 +2,7 @@ package org.system
 
 import akka.actor.ActorSystem
 import akka.kernel.Bootable
+import com.typesafe.config.{Config, ConfigFactory}
 import org.system.core.actors.delegat.Terminator
 import org.system.core.actors.main.RootExecutor
 
@@ -16,16 +17,17 @@ trait BootstrapComponent extends Bootable {
 
   def actorSystem: ActorSystem
 
+  def config: Config
+
   override def startup(): Unit = {
-    prepareCamel(actorSystem)
 
     val rootRef = actorSystem actorOf(
-      Props(classOf[RootExecutor], Path(default("rootDir")) dirOrParentDir()),
-      default("rootActor"))
+      Props[RootExecutor](  RootExecutor(ConfigFactory load "root.conf")),
+      "RootExecutor")
 
     val termRef = actorSystem actorOf(
-      Props(classOf[Terminator], rootRef),
-      default("terminatorActor"))
+      Props[Terminator]( new Terminator(rootRef)(config)),
+      "RootExecutorWatcher")
   }
 
   override def shutdown(): Unit = {
@@ -37,6 +39,7 @@ trait BootstrapComponent extends Bootable {
 
 object Bootstrap extends BootstrapComponent {
 
-  override val actorSystem = ActorSystem create default("systemName")
+  override val actorSystem = ActorSystem create "Albert"
 
+  override implicit def config: Config = ConfigFactory load()
 }

@@ -8,9 +8,7 @@ import org.system.plugin.worker.WorkerActorPlugin
 
 import scala.language.postfixOps
 
-/**
- * Created by nutscracker on 6/30/2014.
- */
+
 class RTPWorker() extends WorkerActorPlugin {
 
   type PluginScenario = RTPScenario
