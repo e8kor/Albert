@@ -29,7 +29,9 @@ lazy val albert = project in file(".") enablePlugins BuildInfoPlugin aggregate( 
 
 lazy val api = project enablePlugins BuildInfoPlugin
 
-lazy val core = project enablePlugins BuildInfoPlugin dependsOn api
+lazy val core = project enablePlugins BuildInfoPlugin dependsOn (api,core_plugins)
+
+lazy val core_plugins = project enablePlugins BuildInfoPlugin dependsOn api
 
 //lazy val rtp = project enablePlugins BuildInfoPlugin dependsOn api
 //

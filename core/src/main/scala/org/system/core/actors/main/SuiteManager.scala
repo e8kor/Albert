@@ -95,7 +95,7 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
     case WorkCompleted if (runnerRefs length) equals ((completed :+ sender()) length) =>
       log info s"runner completed work \n path: ${sender() path}"
       log info s"all runners completed work: suite - ${suiteDir name}"
-      log info s"sending completion status to partner by \n path : ${parent path}"
+      log info s"sending completion status to parent by \n path : ${parent path}"
       parent ! SuiteCompleted
       self ! PoisonPill
     case WorkCompleted =>

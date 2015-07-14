@@ -10,11 +10,9 @@ class InfoPrinter extends PluginRunnerActor {
   override def receive: Receive = {
     case StartWork(dir, cfg) =>
       log info
-        s"""
-           |ScriptRunner created:
-           |path : ${dir path}
-           |config : ${cfg toString}
-        """.stripMargin
+        s"""InfoPrinter created:
+            |path : ${dir path}
+            |config : ${cfg toString}""".stripMargin
 
       sender() ! WorkCompleted
   }

@@ -28,10 +28,13 @@ class SimpleScripting extends PluginRunnerActor {
 
       } map {
         scripts =>
-          import com.googlecode.scalascriptengine._
           scripts map {
             script =>
-              ((EvalCode withoutArgs) [Unit] (script) newInstance)()
+              import com.googlecode.scalascriptengine._
+
+              ((EvalCode withoutArgs)[Unit](script) newInstance)()
+
+              true
           }
       } match {
         case Some(results) =>
