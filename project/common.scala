@@ -21,6 +21,7 @@ object common {
   val scalazVersion = SettingKey[String]("Scalaz library version")
   val scalazStreamVersion = SettingKey[String]("Scalaz Stream library version")
   val shapelessVersion = SettingKey[String]("Shapeless library version")
+  val scalaScriptVersion = SettingKey[String]("Scala Script Engine library version")
 
   def testSettings = Seq(
     scalaTestVersion := "2.2.5",
@@ -54,25 +55,34 @@ object common {
   def configLibraries = Seq(
     ficusVersion := "1.1.2",
     configVersion := "1.2.0",
-//    loggingVersion := "3.1.0",
+    loggingVersion := "3.1.0",
     libraryDependencies ++= Seq(
       "com.typesafe" % "config" % configVersion.value withSources(),
       "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-  //      "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion.value withSources(),
+      "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion.value withSources(),
       "net.ceedubs" %% "ficus" % ficusVersion.value withSources()
     )
   )
 
   def utilityLibraries = Seq(
-  scalazStreamVersion := "0.7.1a",
-  scalazVersion := "7.1.1",
-  shapelessVersion := "2.2.0",
+    scalazStreamVersion := "0.7.1a",
+    scalazVersion := "7.1.1",
+    shapelessVersion := "2.2.0",
     resolvers ++= Seq("Scalaz Bintray Repo" at "https://dl.bintray.com/scalaz/releases"),
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % scalazVersion.value withSources(),
       "org.scalaz.stream" %% "scalaz-stream" % scalazStreamVersion.value withSources(),
       "com.chuusai" %% "shapeless" % shapelessVersion.value withSources()
+    )
+  )
+
+  def scalaScriptEngineLibraries = Seq(
+    scalaScriptVersion := "1.3.10",
+    resolvers ++= Seq(sonatypeRepo("releases")),
+    libraryDependencies ++= Seq(
+      "com.googlecode.scalascriptengine" %% "scalascriptengine" % scalaScriptVersion.value,
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value
     )
   )
 

@@ -13,10 +13,8 @@ class ConfigOps(val config: Config) extends AnyVal {
 
   def findClass(path: String): Option[Class[_]] = {
     if (config hasPath path) {
-      //      Try {
       val clazz = (getClass() getClassLoader()) loadClass (config getString path)
       Option(clazz)
-      //      } toOption
     } else {
       None
     }

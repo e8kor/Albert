@@ -5,41 +5,49 @@ package main
 
 import akka.actor._
 import akka.camel.CamelExtension
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.activemq.camel.component.ActiveMQComponent
 import org.implicits.{config2ConfigOps, dir2DirOps}
-import org.system.command.manage.{StartSuite, SuiteCompleted}
 import org.system.core.actors.System.SystemActor
 import org.system.core.actors.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
+import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
-object RootExecutor {
+object RootExecutor extends LazyLogging {
 
-  def apply(rootConfig: Config) = {
+  def apply(dir: Directory): RootExecutor = {
+    dir findConfig "root.conf" match {
+      case Some(rootConf) =>
+        RootExecutor(dir, rootConf)
+      case None =>
+        sys error s"invalid path: root config not found by \n path: ${dir path}"
+    }
+  }
 
-    val optRootDir = rootConfig findDirectory "root_directory"
+  def apply(dir: Directory, rootConfig: Config): RootExecutor = {
 
-    val suiteDirs = optRootDir map (_ zipDirsByFile "suite.conf") getOrElse Seq()
+    val suiteDirs = dir zipDirsByFile "suite.conf"
 
-    require(optRootDir isDefined,
-      s"""illegal config: root execution directory not found
-          |passed config: $rootConfig""")
+    logger info
+      s"""root executor found suites:
+          |${suiteDirs map (_._1) map (_ name) mkString ", "}""".stripMargin
 
     require(suiteDirs nonEmpty,
       """illegal config: no suites found
         |passed config: $rootCfg""")
 
-    new RootExecutor(optRootDir orNull, suiteDirs)(rootConfig)
+    new RootExecutor(dir)(suiteDirs)(rootConfig)
   }
 }
 
-class RootExecutor private(val rootDirectory: Directory, val suiteDirectories: Seq[(Directory, Config)])(implicit val rootConfig: Config) extends SystemActor {
+class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config) extends SystemActor {
 
-  import context.{become, system}
+  import context.{become, child, system}
 
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
     case thr: Throwable =>
@@ -48,8 +56,11 @@ class RootExecutor private(val rootDirectory: Directory, val suiteDirectories: S
   }
 
   if (rootConfig getBoolean "camel_enabled") {
-    prepareCamel(system)
-    val camel = CamelExtension get system
+    val camel = CamelExtension(system)
+
+    (camel context) removeComponent (rootConfig getString "mqComponent")
+    (camel context) addComponent(rootConfig getString "mqComponent", ActiveMQComponent activeMQComponent)
+
     val producerRef = context actorOf(Props[CommandProducerSystemActor](CommandProducerSystemActor()(rootConfig)), "CommandProducer")
     val consumerRef = context actorOf(Props[CommandConsumerSystemActor](CommandConsumerSystemActor()(rootConfig)), "CommandConsumer")
     val endpointF = (camel activationFutureFor consumerRef)(10 seconds, system dispatcher)
@@ -88,14 +99,8 @@ class RootExecutor private(val rootDirectory: Directory, val suiteDirectories: S
       suiteRefs foreach (_ ! StartSuite)
   }
 
-  //  private def commandProducer = child("CommandProducer")
+  private def commandProducer = child("CommandProducer")
 
-  //  private def commandConsumer = child("CommandConsumer")
+  private def commandConsumer = child("CommandConsumer")
 
-  private def prepareCamel(system: ActorSystem)(implicit config: Config) = {
-    val camel = CamelExtension(system)
-    (camel context) removeComponent ??? /* TODO : need to provide properly default("mqComponent")*/
-    (camel context) addComponent(??? /* TODO : need to provide properly default("mqComponent")*/ , ActiveMQComponent activeMQComponent ??? /* TODO : need to provide properly default("mqURL")*/ )
-    camel
-  }
 }

@@ -7,3 +7,5 @@ name := "core"
 (common buildInfoPluginSettings)
 
 (common testSettings)
+
+(common scalaScriptEngineLibraries)

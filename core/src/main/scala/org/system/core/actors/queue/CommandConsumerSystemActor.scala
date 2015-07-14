@@ -10,10 +10,6 @@ import org.system.core.actors.System.SystemConsumerActor
 
 import scala.language.postfixOps
 
-/**
- * Created by evgeniikorniichuk on 08.11.14.
- */
-
 object CommandConsumerSystemActor {
 
   def apply()(implicit config: Config) = {
