@@ -12,15 +12,15 @@ import scala.language.postfixOps
 
 object CommandConsumerSystemActor {
 
-  def apply()(implicit config: Config) = {
+  def apply(config: Config) = {
     new CommandConsumerSystemActor(config getString "commandConsumerUrl")
   }
 
 }
 
-class CommandConsumerSystemActor(
-                                  override val endpointUri: String
-                                  )(implicit config: Config) extends SystemConsumerActor {
+class CommandConsumerSystemActor private(
+                                          override val endpointUri: String
+                                          )(implicit config: Config) extends SystemConsumerActor {
 
   override def receive: Receive = normal
 

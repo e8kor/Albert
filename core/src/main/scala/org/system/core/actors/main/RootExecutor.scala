@@ -4,17 +4,12 @@ package actors
 package main
 
 import akka.actor._
-import akka.camel.CamelExtension
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.activemq.camel.component.ActiveMQComponent
 import org.implicits.{config2ConfigOps, dir2DirOps}
 import org.system.core.actors.System.SystemActor
-import org.system.core.actors.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
@@ -47,7 +42,7 @@ object RootExecutor extends LazyLogging {
 
 class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config) extends SystemActor {
 
-  import context.{become, child, system}
+  import context.{become, child}
 
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
     case thr: Throwable =>
@@ -55,22 +50,9 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
       SupervisorStrategy restart
   }
 
-  if (rootConfig getBoolean "camel_enabled") {
-    val camel = CamelExtension(system)
-
-    (camel context) removeComponent (rootConfig getString "mqComponent")
-    (camel context) addComponent(rootConfig getString "mqComponent", ActiveMQComponent activeMQComponent)
-
-    val producerRef = context actorOf(Props[CommandProducerSystemActor](CommandProducerSystemActor()(rootConfig)), "CommandProducer")
-    val consumerRef = context actorOf(Props[CommandConsumerSystemActor](CommandConsumerSystemActor()(rootConfig)), "CommandConsumer")
-    val endpointF = (camel activationFutureFor consumerRef)(10 seconds, system dispatcher)
-
-    Await ready(endpointF, 10 seconds)
-  }
-
   val suiteRefs = suiteDirectories map {
     case (dir, conf) =>
-      context actorOf(Props[SuiteManager]( SuiteManager(dir, conf)), dir name)
+      context actorOf(Props(SuiteManager(dir, conf)), dir name)
   }
 
   if (rootConfig bool "auto_start") {

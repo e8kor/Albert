@@ -23,8 +23,8 @@ object SuiteManager extends LazyLogging {
     require((suiteCfg getClasses "runners") nonEmpty,
       s"""illegal config: suite runner not defined
           |loaded class : ${suiteCfg findClass "runner"}
-          |passed dir: ${suiteDir path}
-          |passed config: ${suiteCfg toString}""".stripMargin)
+         |passed dir: ${suiteDir path}
+         |passed config: ${suiteCfg toString}""".stripMargin)
 
 
     val suiteDirs = suiteDir zipDirsByFile "suite.conf"
@@ -55,7 +55,7 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
   } toIndexedSeq
 
   if (suiteCfg bool "file_watch_enabled") {
-    val monitorRef = context actorOf Props(classOf[MonitorActor], 2)
+    val monitorRef = context actorOf Props(new MonitorActor(2))
 
     (suiteDir getSuiteCallbacks) foreach {
       callback =>
@@ -65,7 +65,7 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
 
   val suiteRefs = suiteDirs map {
     case (dir, cfg) =>
-      context actorOf(Props[SuiteManager](SuiteManager(dir, cfg)), dir name)
+      context actorOf(Props(SuiteManager(dir, cfg)), dir name)
   } toIndexedSeq
 
   log info s"suite - ${suiteDir name}: initializing ${suiteRefs length} suites"
@@ -91,14 +91,15 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       }
   }
 
+  // TODO need to implement fail test suite on single test failed as config option
   private def work(completed: IndexedSeq[ActorRef]): Receive = {
-    case WorkCompleted if (runnerRefs length) equals ((completed :+ sender()) length) =>
+    case ExecutionCompleted if (runnerRefs length) equals ((completed :+ sender()) length) =>
       log info s"runner completed work \n path: ${sender() path}"
       log info s"all runners completed work: suite - ${suiteDir name}"
       log info s"sending completion status to parent by \n path : ${parent path}"
       parent ! SuiteCompleted
       self ! PoisonPill
-    case WorkCompleted =>
+    case ExecutionCompleted =>
 
       val tmp = completed :+ sender()
 

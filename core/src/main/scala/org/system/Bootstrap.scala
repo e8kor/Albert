@@ -1,8 +1,10 @@
 package org.system
 
 import akka.actor.ActorSystem
+import akka.camel.CamelExtension
 import akka.kernel.Bootable
 import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.activemq.camel.component.ActiveMQComponent
 import org.system.core.actors.delegat.Terminator
 import org.system.core.actors.main.RootExecutor
 
