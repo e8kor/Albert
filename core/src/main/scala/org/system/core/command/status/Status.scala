@@ -1,8 +1,8 @@
 package org.system.core.command.status
 
-import org.system.api.command.Responce
+import org.system.api.command.Response
 
-sealed trait Status extends Responce
+sealed trait Status extends Response
 
 case object Working extends Status
 

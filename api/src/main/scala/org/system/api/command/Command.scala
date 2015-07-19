@@ -4,4 +4,4 @@ sealed trait Command
 
 trait Request extends Command
 
-trait Responce extends Command
+trait Response extends Command

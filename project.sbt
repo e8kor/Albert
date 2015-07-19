@@ -33,6 +33,8 @@ lazy val core = project enablePlugins BuildInfoPlugin dependsOn (api,core_plugin
 
 lazy val core_plugins = project enablePlugins BuildInfoPlugin dependsOn api
 
+//lazy val rtp_old = project
+
 //lazy val rtp = project enablePlugins BuildInfoPlugin dependsOn api
 //
 //lazy val docs = project enablePlugins BuildInfoPlugin dependsOn(core, api, rtp)

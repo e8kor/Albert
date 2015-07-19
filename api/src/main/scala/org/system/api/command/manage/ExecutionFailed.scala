@@ -1,6 +1,6 @@
 package org.system.api.command.manage
 
-import org.system.api.command.Responce
+import org.system.api.command.Response
 
-case object ExecutionFailed extends Responce
+case object ExecutionFailed extends Response
 

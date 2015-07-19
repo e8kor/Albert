@@ -22,10 +22,9 @@ object SuiteManager extends LazyLogging {
 
     require((suiteCfg getClasses "runners") nonEmpty,
       s"""illegal config: suite runner not defined
-          |loaded class : ${suiteCfg findClass "runner"}
-         |passed dir: ${suiteDir path}
-         |passed config: ${suiteCfg toString}""".stripMargin)
-
+          |loaded classes : ${suiteCfg getClasses "runners" map (_ getSimpleName) mkString ", "}
+          |passed dir: ${suiteDir path}
+          |passed config: ${suiteCfg toString}""".stripMargin)
 
     val suiteDirs = suiteDir zipDirsByFile "suite.conf"
 
@@ -48,6 +47,8 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
   // TODO Example - runners: [ "simpleInfo.conf" ] or runners: [ "simpleInfo" ]
   // TODO Such configs can be packed with 3rd party jars or added to classpath
   // TODO this approach need to be implemented
+  // ---------------
+  // TODO usability of plugins that declared via config files is approach to use plugin actors via remote connection
 
   val runnerRefs = ((suiteCfg getClasses "runners") zipWithIndex) map {
     case (clazz, index) =>

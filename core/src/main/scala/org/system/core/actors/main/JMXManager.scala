@@ -11,6 +11,7 @@ import org.apache.activemq.camel.component.ActiveMQComponent
 import org.system.core.actors.System.SystemActor
 import org.system.core.actors.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
 
+import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
@@ -31,9 +32,12 @@ class JMXManager private(jmxConfig: Config) extends SystemActor {
 
   import context.system
 
+  // TODO root executors can also be piped throw become contexts
+  val rootExecutorRefs = mutable.Seq[ActorRef]()
+
   // TODO Need to decide on messages interface for commands
-  val producerRef = context actorOf(Props(CommandProducerSystemActor()(jmxConfig)), "CommandProducer")
-  val consumerRef = context actorOf(Props(CommandConsumerSystemActor()(jmxConfig)), "CommandConsumer")
+  val producerRef = context actorOf(Props(CommandProducerSystemActor(jmxConfig)), "CommandProducer")
+  val consumerRef = context actorOf(Props(CommandConsumerSystemActor(jmxConfig)), "CommandConsumer")
 
   val camel = CamelExtension(system)
 

@@ -13,7 +13,7 @@ import scala.language.postfixOps
 object CommandConsumerSystemActor {
 
   def apply(config: Config) = {
-    new CommandConsumerSystemActor(config getString "commandConsumerUrl")
+    new CommandConsumerSystemActor(config getString "commandConsumerUrl")(config)
   }
 
 }
