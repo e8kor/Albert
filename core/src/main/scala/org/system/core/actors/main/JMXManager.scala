@@ -10,6 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.activemq.camel.component.ActiveMQComponent
 import org.system.core.actors.System.SystemActor
 import org.system.core.actors.queue.{CommandConsumerSystemActor, CommandProducerSystemActor}
+import org.system.core.actors.track.EventTracker
 
 import scala.collection.mutable
 import scala.concurrent.Await
@@ -34,6 +35,7 @@ class JMXManager private(jmxConfig: Config) extends SystemActor {
 
   // TODO root executors can also be piped throw become contexts
   val rootExecutorRefs = mutable.Seq[ActorRef]()
+  val trackingRef = context actorOf Props(EventTracker())
 
   // TODO Need to decide on messages interface for commands
   val producerRef = context actorOf(Props(CommandProducerSystemActor(jmxConfig)), "CommandProducer")

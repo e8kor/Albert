@@ -8,6 +8,7 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import org.implicits.{config2ConfigOps, dir2DirOps}
 import org.system.core.actors.System.SystemActor
+import org.system.core.actors.track.EventTracker
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 
 import scala.language.postfixOps
@@ -26,7 +27,11 @@ object RootExecutor extends LazyLogging {
 
   def apply(dir: Directory, rootConfig: Config): RootExecutor = {
 
-    val suiteDirs = dir zipDirsByFile "suite.conf"
+    val rootDir = rootConfig findDirectory "root_directory" getOrElse dir
+
+    val suiteDirs = rootDir zipDirsByFile "suite.conf"
+
+    logger info s"root config directory: ${rootDir path} "
 
     logger info
       s"""root executor found suites:
@@ -36,8 +41,9 @@ object RootExecutor extends LazyLogging {
       """illegal config: no suites found
         |passed config: $rootCfg""")
 
-    new RootExecutor(dir)(suiteDirs)(rootConfig)
+    new RootExecutor(rootDir)(suiteDirs)(rootConfig)
   }
+
 }
 
 class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config) extends SystemActor {
@@ -61,6 +67,8 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
   } else {
     log info s"root executor initialization completed, waiting to your command"
   }
+
+  val eventTracker = context actorOf(Props(EventTracker()), s"${rootDirectory name}.${classOf[EventTracker] getSimpleName}")
 
   override def receive = awaitStart()
 
