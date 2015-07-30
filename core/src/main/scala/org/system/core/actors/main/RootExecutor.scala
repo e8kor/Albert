@@ -10,6 +10,7 @@ import org.implicits.{config2ConfigOps, dir2DirOps}
 import org.system.core.actors.System.SystemActor
 import org.system.core.actors.track.EventTracker
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
+import org.system.core.command.track.PublishStatus
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
@@ -47,8 +48,8 @@ object RootExecutor extends LazyLogging {
 }
 
 class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config) extends SystemActor {
-
-  import context.{become, child}
+  import scala.concurrent.duration.DurationInt
+  import akka.event.EventStream.fromActorSystem
 
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
     case thr: Throwable =>
@@ -56,30 +57,39 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
       SupervisorStrategy restart
   }
 
+  val autoStart = rootConfig bool "auto_start"
+
+  val publishInitialDelay = (rootConfig duration "publish_status_initial_delay") getOrElse (1 second)
+
+  val publishInterval = (rootConfig duration "publish_status_interval_delay") getOrElse (5 seconds)
+
   val suiteRefs = suiteDirectories map {
     case (dir, conf) =>
       context actorOf(Props(SuiteManager(dir, conf)), dir name)
   }
 
-  if (rootConfig bool "auto_start") {
+  val eventTracker = context actorOf(Props(EventTracker()), s"${rootDirectory name}.${classOf[EventTracker] getSimpleName}")
+
+  if (autoStart) {
     log info s"root executor start ${suiteRefs length} suites automatically"
     self ! StartSuite
   } else {
     log info s"root executor initialization completed, waiting to your command"
   }
 
-  val eventTracker = context actorOf(Props(EventTracker()), s"${rootDirectory name}.${classOf[EventTracker] getSimpleName}")
+  (((context system) scheduler) schedule (publishInitialDelay, publishInterval)) {
+    (context system) publish PublishStatus
+  }
 
   override def receive = awaitStart()
 
   def awaitCompletion(completed: Seq[ActorRef]): Receive = {
-
     case SuiteCompleted if ((completed :+ sender()) length) equals (suiteRefs length) =>
       log info "root executor: all suites was completed"
       self ! PoisonPill
     case SuiteCompleted =>
       log info "root executor: one of suites completed "
-      become(awaitCompletion(completed :+ sender()))
+      context become awaitCompletion(completed :+ sender())
   }
 
   private def awaitStart(): Receive = {
@@ -89,8 +99,8 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
       suiteRefs foreach (_ ! StartSuite)
   }
 
-  private def commandProducer = child("CommandProducer")
+  private def commandProducer = context child "CommandProducer"
 
-  private def commandConsumer = child("CommandConsumer")
+  private def commandConsumer = context child "CommandConsumer"
 
 }

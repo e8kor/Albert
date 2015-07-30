@@ -1,7 +1,10 @@
 package org.utils
 
+import scala.concurrent.duration.TimeUnit
+import scala.concurrent.duration.SECONDS
 import com.typesafe.config.Config
 
+import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
@@ -49,6 +52,15 @@ class ConfigOps(val config: Config) extends AnyVal {
       config getBoolean path
     } else {
       false
+    }
+  }
+
+  def duration(path:String, timeUnit: TimeUnit = SECONDS):Option[FiniteDuration] = {
+    import scala.concurrent.duration.pairLongToDuration
+    if (config hasPath path) {
+      Some((config getDuration (path, timeUnit)) -> timeUnit)
+    } else {
+      None
     }
   }
 

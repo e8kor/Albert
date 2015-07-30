@@ -17,7 +17,7 @@ import scala.language.postfixOps
 import scala.reflect.io.Directory
 
 object SuiteManager extends LazyLogging {
-
+  
   def apply(suiteDir: Directory, suiteCfg: Config) = {
 
     // TODO Configuration can be parsed to config case class and provided to suite
