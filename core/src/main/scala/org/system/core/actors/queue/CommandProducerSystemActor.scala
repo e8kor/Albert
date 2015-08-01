@@ -9,6 +9,7 @@ object CommandProducerSystemActor {
   }
 }
 
+// TODO This guy implementation not finished yet
 class CommandProducerSystemActor private(
                                           override val endpointUri: String
                                           )(implicit config: Config) extends SystemProducerActor

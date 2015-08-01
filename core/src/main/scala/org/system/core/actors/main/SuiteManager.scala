@@ -17,7 +17,7 @@ import scala.language.postfixOps
 import scala.reflect.io.Directory
 
 object SuiteManager extends LazyLogging {
-  
+
   def apply(suiteDir: Directory, suiteCfg: Config) = {
 
     // TODO Configuration can be parsed to config case class and provided to suite
@@ -58,9 +58,9 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
 
   private val fileWatchEnabled = suiteCfg bool "file_watch_enabled"
 
-  private val runnerClazzes = suiteCfg getClasses "runners"  // TODO need to check that class is subclass of akka.actor.Actor
+  private val runnerClasses = suiteCfg getClasses "runners"  // TODO need to check that class is subclass of akka.actor.Actor
 
-  private val runnerRefs = (runnerClazzes zipWithIndex) map {
+  private val runnerRefs = (runnerClasses zipWithIndex) map {
     case (clazz, index) =>
       context actorOf(Props(clazz), s"${suiteDir name}.${clazz getSimpleName}.$index")
   } toIndexedSeq
@@ -135,7 +135,7 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
 
   // TODO need to implement fail test suite on single test failed as config option
   private def work(completed: IndexedSeq[ActorRef]): Receive = {
-    case ExecutionCompleted if (runnerRefs length) equals ((completed :+ sender()) length) =>
+    case state:ExecutionCompleted if (runnerRefs length) equals ((completed :+ sender()) length) =>
 
       log info s"runner completed work \n path: ${sender() path}"
       log info s"all runners completed work: suite - ${suiteDir name}"
@@ -145,7 +145,7 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       (context parent) ! SuiteCompleted
       self ! PoisonPill
 
-    case ExecutionCompleted =>
+    case state:ExecutionCompleted =>
 
       val tmp = completed :+ sender()
 

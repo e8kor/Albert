@@ -18,6 +18,8 @@ object CommandConsumerSystemActor {
 
 }
 
+
+// TODO This guy implementation not finished yet
 class CommandConsumerSystemActor private(
                                           override val endpointUri: String
                                           )(implicit config: Config) extends SystemConsumerActor {

@@ -1,17 +1,14 @@
 package org.system
 
 import akka.actor.ActorSystem
-import akka.camel.CamelExtension
-import akka.kernel.Bootable
 import com.typesafe.config.{Config, ConfigFactory}
-import org.apache.activemq.camel.component.ActiveMQComponent
 import org.system.core.actors.delegat.Terminator
 import org.system.core.actors.main.RootExecutor
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
-trait BootstrapComponent extends Bootable {
+trait BootstrapComponent {
 
   import akka.actor.{ActorSystem, Props}
 
@@ -19,7 +16,7 @@ trait BootstrapComponent extends Bootable {
 
   def config: Config
 
-  override def startup(): Unit = {
+  def startup(): Unit = {
 
     // TODO how to pass root directory here ?
     // TODO first option via flag  -DalbertRoot=/some/path/to/suites
@@ -43,16 +40,18 @@ trait BootstrapComponent extends Bootable {
       "RootExecutorWatcher")
   }
 
-  override def shutdown(): Unit = {
+  def shutdown(): Unit = {
     actorSystem shutdown()
     sys exit 0
   }
 
 }
 
-object Bootstrap extends BootstrapComponent {
+object App extends BootstrapComponent with App {
 
   override val actorSystem = ActorSystem create "Albert"
 
   override implicit def config: Config = ConfigFactory load()
+
+  startup()
 }

@@ -3,7 +3,7 @@ package org.system.plugin.script.runner
 
 import akka.actor.PoisonPill
 import com.typesafe.config.ConfigFactory
-import org.system.api.command.manage.{ExecutionCompleted, ExecutionFailed, StartWork}
+import org.system.api.command.manage.{ExecutionSuccessfullyCompleted, ExecutionCompleted, ExecutionFailed, StartWork}
 import org.system.plugin.runner.PluginRunnerActor
 
 import scala.language.postfixOps
@@ -41,7 +41,7 @@ class SimpleScripting extends PluginRunnerActor {
       } match {
         case Some(results) =>
           log info s"simple script runner finished execution: ${results length} executed"
-          sender() ! ExecutionCompleted
+          sender() ! ExecutionSuccessfullyCompleted
         case None =>
           log info s"simple script failed to execute, some configs or scripts not found"
           sender() ! ExecutionFailed

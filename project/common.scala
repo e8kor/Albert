@@ -129,6 +129,46 @@ object common {
 
   def promptSettings = Prompt settings
 
+  def nativePackagerSettings = {
+    import com.typesafe.sbt.SbtNativePackager._
+    import com.typesafe.sbt.SbtNativePackager.autoImport.NativePackagerHelper._
+    import com.typesafe.sbt.SbtNativePackager.autoImport.NativePackagerKeys._
+
+    mappings ++= {
+      ((file("../") * "README*").get map {
+        readmeFile: File =>
+          readmeFile -> readmeFile.getName
+      }) ++
+        ((file("../") * "LICENSE*").get map {
+          licenseFile: File =>
+            licenseFile -> licenseFile.getName
+        }) ++ directory("src/main/resources")
+    }
+
+//    bashScriptConfigLocation in Universal := Some("${app_home}/../resources/application.ini")
+
+//    bashScriptExtraDefines += """addJava "-Dconfig.file=${app_home}/../conf/application.conf""""
+
+//    bashScriptExtraDefines += """addJava "-Dconfig.file=${app_home}/../conf/application.conf""""
+
+    packageSummary in Universal := "Albert Structural Execution System"
+
+    packageDescription  in Universal := "Automated suite execution system"
+
+    maintainer in Universal:= "IEvgenii Korniichuk <nutscracker.ua@gmail.com>"
+
+    wixProductId := "ce07be71-510d-414a-92d4-dff47631848a"
+
+    wixProductUpgradeId := "4552fb0e-e257-4dbd-9ecb-dba9dbacf424"
+
+    scriptClasspath ++= Seq("../conf", "../scripts")
+
+    executableScriptName := "albert"
+
+    mainClass in Compile := Some("org.system.App")
+
+  }
+
   //  def publishSettings = Seq(
   //    publishMavenStyle := true,
   //    scmInfo := Some(ScmInfo(url("https://github.com/oncue/knobs"),

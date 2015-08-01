@@ -15,4 +15,6 @@ object SuiteConfigFiles {
 
   val testSuite5Dir = Directory("/Users/evgeniikorniichuk/Documents/Workspace/Albert/TestSuite5")
 
+  val testSuite6Dir = Directory("/Users/evgeniikorniichuk/Documents/Workspace/Albert/TestSuite6")
+
 }

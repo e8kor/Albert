@@ -9,24 +9,36 @@ import com.typesafe.scalalogging.LazyLogging
 import org.implicits.{config2ConfigOps, dir2DirOps}
 import org.system.core.actors.System.SystemActor
 import org.system.core.actors.track.EventTracker
+import org.system.core.command.jmx.RootExecutorCompleted
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 import org.system.core.command.track.PublishStatus
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
+// TODO search for common standarts of reports about tests execution
+
 object RootExecutor extends LazyLogging {
 
-  def apply(dir: Directory): RootExecutor = {
+  def apply(dir: Directory, hasJMXExecutor:Boolean): RootExecutor = {
     dir findConfig "root.conf" match {
       case Some(rootConf) =>
-        RootExecutor(dir, rootConf)
+        RootExecutor(dir, rootConf, hasJMXExecutor)
       case None =>
         sys error s"invalid path: root config not found by \n path: ${dir path}"
     }
   }
 
-  def apply(dir: Directory, rootConfig: Config): RootExecutor = {
+  def apply(dir: Directory): RootExecutor = {
+    dir findConfig "root.conf" match {
+      case Some(rootConf) =>
+        RootExecutor(dir, rootConf, hasJMXExecutor = false)
+      case None =>
+        sys error s"invalid path: root config not found by \n path: ${dir path}"
+    }
+  }
+
+  def apply(dir: Directory, rootConfig: Config, hasJMXExecutor:Boolean): RootExecutor = {
 
     val rootDir = rootConfig findDirectory "root_directory" getOrElse dir
 
@@ -42,12 +54,12 @@ object RootExecutor extends LazyLogging {
       """illegal config: no suites found
         |passed config: $rootCfg""")
 
-    new RootExecutor(rootDir)(suiteDirs)(rootConfig)
+    new RootExecutor(rootDir)(suiteDirs)(rootConfig)(hasJMXExecutor)
   }
 
 }
 
-class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config) extends SystemActor {
+class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config)(hasJMXExecutor:Boolean) extends SystemActor {
   import scala.concurrent.duration.DurationInt
   import akka.event.EventStream.fromActorSystem
 
@@ -57,35 +69,38 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
       SupervisorStrategy restart
   }
 
-  val autoStart = rootConfig bool "auto_start"
+  private val autoStart = rootConfig bool "auto_start"
 
-  val publishInitialDelay = (rootConfig duration "publish_status_initial_delay") getOrElse (1 second)
+  private val publishInitialDelay = (rootConfig duration "publish_status_initial_delay") getOrElse (1 second)
 
-  val publishInterval = (rootConfig duration "publish_status_interval_delay") getOrElse (5 seconds)
+  private val publishInterval = (rootConfig duration "publish_status_interval_delay") getOrElse (5 seconds)
 
-  val suiteRefs = suiteDirectories map {
+  private val suiteRefs = suiteDirectories map {
     case (dir, conf) =>
       context actorOf(Props(SuiteManager(dir, conf)), dir name)
   }
 
-  val eventTracker = context actorOf(Props(EventTracker()), s"${rootDirectory name}.${classOf[EventTracker] getSimpleName}")
+  private val eventTracker = context actorOf(Props(EventTracker()), s"${rootDirectory name}.${classOf[EventTracker] getSimpleName}")
 
-  if (autoStart) {
+  if (autoStart || hasJMXExecutor) {
     log info s"root executor start ${suiteRefs length} suites automatically"
     self ! StartSuite
   } else {
     log info s"root executor initialization completed, waiting to your command"
   }
 
-  (((context system) scheduler) schedule (publishInitialDelay, publishInterval)) {
-    (context system) publish PublishStatus
-  }
+//  (((context system) scheduler) schedule (publishInitialDelay, publishInterval)) {
+//    (context system) publish PublishStatus
+//  }
 
   override def receive = awaitStart()
 
   def awaitCompletion(completed: Seq[ActorRef]): Receive = {
     case SuiteCompleted if ((completed :+ sender()) length) equals (suiteRefs length) =>
       log info "root executor: all suites was completed"
+      if (hasJMXExecutor) {
+        (context parent) ! RootExecutorCompleted
+      }
       self ! PoisonPill
     case SuiteCompleted =>
       log info "root executor: one of suites completed "

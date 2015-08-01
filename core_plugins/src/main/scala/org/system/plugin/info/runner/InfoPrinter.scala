@@ -1,7 +1,7 @@
 package org.system.plugin.info.runner
 
 import akka.actor.PoisonPill
-import org.system.api.command.manage.{ExecutionCompleted, StartWork}
+import org.system.api.command.manage.{ExecutionSuccessfullyCompleted, ExecutionCompleted, StartWork}
 import org.system.plugin.runner.PluginRunnerActor
 
 import scala.language.postfixOps
@@ -15,7 +15,7 @@ class InfoPrinter extends PluginRunnerActor {
             |path : ${dir path}
             |config : ${cfg toString}""".stripMargin
 
-      sender() ! ExecutionCompleted
+      sender() ! ExecutionSuccessfullyCompleted
       self ! PoisonPill
   }
 
