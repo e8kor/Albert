@@ -1,6 +1,6 @@
 package org.system
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorSystem, Props}
 import scala.concurrent.duration._
 import com.typesafe.config.{Config, ConfigFactory}
 import org.system.core.actors.delegat.Terminator
@@ -11,12 +11,12 @@ import scala.language.postfixOps
 import scala.reflect.io.Directory
 
 trait BootstrapComponent {
-
-  import akka.actor.{ActorSystem, Props}
+  self:App =>
 
   def actorSystem: ActorSystem
 
   def config: Config
+
 
   def startup(): Unit = {
 
@@ -49,11 +49,11 @@ trait BootstrapComponent {
 
 }
 
-object Albert extends BootstrapComponent with App {
+object Main extends BootstrapComponent with App {
 
   override val actorSystem = ActorSystem create "Albert"
 
-  override implicit def config: Config = ConfigFactory load()
+  override val config: Config = ConfigFactory load()
 
   startup()
 }

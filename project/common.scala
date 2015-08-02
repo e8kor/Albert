@@ -26,13 +26,11 @@ object common {
   def testSettings = Seq(
     scalaTestVersion := "2.2.5",
     scalaCheckVersion := "1.12.3",
-    akkaVersion := "2.4-M2",
     scalaMockVersion := "3.2",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % scalaTestVersion.value % "test" withSources(),
       "org.scalacheck" %% "scalacheck" % scalaCheckVersion.value % "test" withSources(),
-      "org.scalamock" %% "scalamock-scalatest-support" % scalaMockVersion.value % "test" withSources(),
-      "com.typesafe.akka" %% "akka-testkit" % akkaVersion.value % "test" withSources()
+      "org.scalamock" %% "scalamock-scalatest-support" % scalaMockVersion.value % "test" withSources()
     )
   )
 
@@ -144,7 +142,7 @@ object common {
         ((file("../") * "LICENSE*").get map {
           licenseFile: File =>
             licenseFile -> licenseFile.getName
-        }) ++ directory("src/main/resources")
+        }) ++ directory("../core/src/main/resources")
     }
 
     packageSummary in Universal := "Albert Structural Execution System"
@@ -161,7 +159,7 @@ object common {
 
     executableScriptName := "albert"
 
-    mainClass in Compile := Some("org.system.Albert")
+    mainClass in Compile := Some("org.system.Main")
 
   }
 

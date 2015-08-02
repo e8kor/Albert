@@ -2,7 +2,7 @@ package org.utils
 
 import scala.concurrent.duration.TimeUnit
 import scala.concurrent.duration.SECONDS
-import com.typesafe.config.Config
+import com.typesafe.config.{ConfigFactory, Config}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
@@ -29,6 +29,19 @@ class ConfigOps(val config: Config) extends AnyVal {
       config getStringList path map {
         clazz =>
           getClass() getClassLoader() loadClass clazz
+      }
+    } else {
+      Seq()
+    }
+  }
+
+
+  def getPluginsConfig(path: String): Seq[Config] = {
+    import scala.collection.JavaConversions.asScalaBuffer
+    if (config hasPath path) {
+      (config getStringList path) map {
+        fileName =>
+          ConfigFactory load
       }
     } else {
       Seq()

@@ -6,12 +6,12 @@ package main
 import akka.actor._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.utils.implicits.{config2ConfigOps, dir2DirOps}
 import org.system.core.actors.System.SystemActor
 import org.system.core.actors.track.EventTracker
 import org.system.core.command.jmx.RootExecutorCompleted
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 import org.system.core.command.track.PublishStatus
+import org.utils.implicits.{config2ConfigOps, dir2DirOps}
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
@@ -20,7 +20,7 @@ import scala.reflect.io.Directory
 
 object RootExecutor extends LazyLogging {
 
-  def apply(dir: Directory, hasJMXExecutor:Boolean): RootExecutor = {
+  def apply(dir: Directory, hasJMXExecutor: Boolean): RootExecutor = {
     dir findConfig "root.conf" match {
       case Some(rootConf) =>
         RootExecutor(dir, rootConf, hasJMXExecutor)
@@ -38,7 +38,7 @@ object RootExecutor extends LazyLogging {
     }
   }
 
-  def apply(dir: Directory, rootConfig: Config, hasJMXExecutor:Boolean): RootExecutor = {
+  def apply(dir: Directory, rootConfig: Config, hasJMXExecutor: Boolean): RootExecutor = {
 
     val rootDir = rootConfig findDirectory "root_directory" getOrElse dir
 
@@ -59,9 +59,10 @@ object RootExecutor extends LazyLogging {
 
 }
 
-class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config)(hasJMXExecutor:Boolean) extends SystemActor {
+class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config)(hasJMXExecutor: Boolean) extends SystemActor {
+
   import scala.concurrent.duration.DurationInt
-  import akka.event.EventStream.fromActorSystem
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
     case thr: Throwable =>
@@ -89,9 +90,9 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
     log info s"root executor initialization completed, waiting to your command"
   }
 
-//  (((context system) scheduler) schedule (publishInitialDelay, publishInterval)) {
-//    (context system) publish PublishStatus
-//  }
+  (((context system) scheduler) schedule (publishInitialDelay, publishInterval)) {
+    ((context system) eventStream) publish PublishStatus
+  }
 
   override def receive = awaitStart()
 

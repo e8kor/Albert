@@ -1,7 +1,6 @@
 package org.utils
 
 import com.typesafe.config.Config
-import org.utils.{ConfigOps, DirectoryOps, FileOps, PathOps}
 
 import scala.language.{implicitConversions, postfixOps}
 import scala.reflect.io.{Directory, File}
@@ -21,12 +20,12 @@ package object implicits {
 
   implicit def java2ScalaPathOps(path: JavaPath): PathOps = new PathOps(path)
 
-  implicit def dir2DirOps(dir:Directory): DirectoryOps = new DirectoryOps(dir)
+  implicit def dir2DirOps(dir: Directory): DirectoryOps = new DirectoryOps(dir)
 
-  implicit def file2FileOps(file:File): FileOps = new FileOps(file)
+  implicit def file2FileOps(file: File): FileOps = new FileOps(file)
 
-  implicit def path2PathOps(path:ScalaPath): PathOps = new PathOps(path)
+  implicit def path2PathOps(path: ScalaPath): PathOps = new PathOps(path)
 
-  implicit def config2ConfigOps(config:Config):ConfigOps = new ConfigOps(config)
+  implicit def config2ConfigOps(config: Config): ConfigOps = new ConfigOps(config)
 }
 

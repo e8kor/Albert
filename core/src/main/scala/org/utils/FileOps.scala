@@ -12,7 +12,7 @@ class FileOps(val it: File) {
   import java.nio.file.WatchEvent.Kind
 
 
-  def withFileCallback() = callback(Modified, it, file => "MOD" /*logger info s"monitor: file updated - ${file toString}"*/)
+  def withFileCallback() = callback(Modified, it, file => Unit /*logger info s"monitor: file updated - ${file toString}"*/)
 
   private def callback(kind: Kind[java.nio.file.Path], path: Path, callback: Callback) = RegisterCallback(kind, None, recursive = false, (path jfile) toPath, callback)
 
