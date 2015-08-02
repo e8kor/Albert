@@ -6,7 +6,7 @@ package main
 import akka.actor._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.implicits.{config2ConfigOps, dir2DirOps}
+import org.utils.implicits.{config2ConfigOps, dir2DirOps}
 import org.system.core.actors.System.SystemActor
 import org.system.core.actors.track.EventTracker
 import org.system.core.command.jmx.RootExecutorCompleted

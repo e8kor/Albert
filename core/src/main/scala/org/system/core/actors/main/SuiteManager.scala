@@ -7,7 +7,7 @@ import akka.actor.{ActorRef, PoisonPill, Props}
 import com.beachape.filemanagement.MonitorActor
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.implicits.{config2ConfigOps, dir2DirOps, path2PathOps}
+import org.utils.implicits.{config2ConfigOps, dir2DirOps, path2PathOps}
 import org.system.api.command.manage._
 import org.system.core.actors.System.SystemActor
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}

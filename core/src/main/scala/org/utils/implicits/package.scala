@@ -1,4 +1,4 @@
-package org
+package org.utils
 
 import com.typesafe.config.Config
 import org.utils.{ConfigOps, DirectoryOps, FileOps, PathOps}

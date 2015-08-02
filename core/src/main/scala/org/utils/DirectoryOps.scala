@@ -13,7 +13,7 @@ class DirectoryOps(val it: Directory) {
   import java.nio.file.StandardWatchEventKinds.{ENTRY_CREATE => Created, ENTRY_MODIFY => Modified}
   import java.nio.file.WatchEvent.Kind
 
-  import org.implicits.{dir2DirOps, scala2JavaPath}
+  import org.utils.implicits.{dir2DirOps, scala2JavaPath}
 
 
   def filterDirsBy(fileName: String) = (it dirs) filter (dir => dir findConfig fileName isDefined) toSeq
