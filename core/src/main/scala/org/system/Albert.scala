@@ -1,10 +1,12 @@
 package org.system
 
 import akka.actor.ActorSystem
+import scala.concurrent.duration._
 import com.typesafe.config.{Config, ConfigFactory}
 import org.system.core.actors.delegat.Terminator
 import org.system.core.actors.main.RootExecutor
 
+import scala.concurrent.Await
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
@@ -41,13 +43,13 @@ trait BootstrapComponent {
   }
 
   def shutdown(): Unit = {
-    actorSystem shutdown()
+    Await result(actorSystem terminate(), 30 seconds)
     sys exit 0
   }
 
 }
 
-object App extends BootstrapComponent with App {
+object Albert extends BootstrapComponent with App {
 
   override val actorSystem = ActorSystem create "Albert"
 

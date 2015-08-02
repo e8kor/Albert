@@ -1,6 +1,6 @@
 <configuration>
 
-    <property name = "projectName" value="RTP"/>
+    <property name = "projectName" value="AlbertTest"/>
 
     <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
 

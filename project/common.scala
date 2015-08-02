@@ -26,7 +26,7 @@ object common {
   def testSettings = Seq(
     scalaTestVersion := "2.2.5",
     scalaCheckVersion := "1.12.3",
-    akkaVersion := "2.3.11",
+    akkaVersion := "2.4-M2",
     scalaMockVersion := "3.2",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % scalaTestVersion.value % "test" withSources(),
@@ -37,10 +37,12 @@ object common {
   )
 
   def akkaLibraries = Seq(
-    akkaVersion := "2.3.11",
+    akkaVersion := "2.4-M2",
     camelVersion := "5.11.1",
     watcherVersion := "0.1.5",
     libraryDependencies ++= Seq(
+      // TODO good option to make system typed
+      "com.typesafe.akka" %% "akka-typed-experimental" % akkaVersion.value withSources(),
       "com.typesafe.akka" %% "akka-actor" % akkaVersion.value withSources(),
       "com.typesafe.akka" %% "akka-contrib" % akkaVersion.value withSources(),
       "com.typesafe.akka" %% "akka-remote" % akkaVersion.value withSources(),
@@ -145,12 +147,6 @@ object common {
         }) ++ directory("src/main/resources")
     }
 
-//    bashScriptConfigLocation in Universal := Some("${app_home}/../resources/application.ini")
-
-//    bashScriptExtraDefines += """addJava "-Dconfig.file=${app_home}/../conf/application.conf""""
-
-//    bashScriptExtraDefines += """addJava "-Dconfig.file=${app_home}/../conf/application.conf""""
-
     packageSummary in Universal := "Albert Structural Execution System"
 
     packageDescription  in Universal := "Automated suite execution system"
@@ -165,7 +161,7 @@ object common {
 
     executableScriptName := "albert"
 
-    mainClass in Compile := Some("org.system.App")
+    mainClass in Compile := Some("org.system.Albert")
 
   }
 
