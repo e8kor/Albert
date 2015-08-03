@@ -72,19 +72,19 @@ buildInfoPackage := s"${organization value}.${name value}.info"
 
 enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
-scalacOptions := Seq(
-  "-deprecation",
-  "-feature",
-  "-encoding", "utf8",
-  "-language:postfixOps",
-  "-language:higherKinds",
-  "-language:implicitConversions",
-  "-unchecked",
-  "-Xcheckinit",
-  "-Xfuture",
-  "-Xlint",
-  "-Xfatal-warnings",
-  "-Yno-adapted-args",
-  "-Ywarn-dead-code",
-  "-Ywarn-value-discard"
- )
+//scalacOptions := Seq(
+//  "-deprecation",
+//  "-feature",
+//  "-encoding", "utf8",
+//  "-language:postfixOps",
+//  "-language:higherKinds",
+//  "-language:implicitConversions",
+//  "-unchecked",
+//  "-Xcheckinit",
+//  "-Xfuture",
+//  "-Xlint",
+//  "-Xfatal-warnings",
+//  "-Yno-adapted-args",
+//  "-Ywarn-dead-code",
+//  "-Ywarn-value-discard"
+// )
