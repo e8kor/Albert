@@ -1,0 +1,12 @@
+[submodule "engine"]
+	path = engine
+	url = git@github.com:e8kor/AlbertEngine.git
+[submodule "plugin_api"]
+	path = plugin_api
+	url = git@github.com:e8kor/AlbertPluginAPI.git
+[submodule "integration_api"]
+	path = integration_api
+	url = git@github.com:e8kor/AlbertIntegrationAPI.git
+[submodule "plugins"]
+	path = plugins
+	url = git@github.com:e8kor/AlbertCorePlugins.git
