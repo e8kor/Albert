@@ -1,36 +1,21 @@
-name := "albert"
+name := "Albert"
 
-organization in Global := "org.system"
+normalizedName := "albert"
 
-scalaVersion in Global := "2.11.6"
+description := "Automated system for command suite execution based on Akka actor system and plugins"
 
-crossScalaVersions in Global := Seq("2.11.6", "2.10.5")
+startYear := Some(2014)
 
-//scalacOptions in Global := Seq(
-//  "-deprecation",
-//  "-feature",
-//  "-encoding", "utf8",
-//  "-language:postfixOps",
-//  "-language:higherKinds",
-//  "-language:implicitConversions",
-//  "-unchecked",
-//  "-Xcheckinit",
-//  "-Xfuture",
-//  "-Xlint",
-//  "-Xfatal-warnings",
-//  "-Yno-adapted-args",
-//  "-Ywarn-dead-code",
-//  "-Ywarn-value-discard"
-// )
+developers := List(
+  Developer("e8kor", "IEvgenii Korniichuk", "nutscracker.ua@gmail.com", url("https://github.com/e8kor"))
+)
 
-//lazy val rtp_old = project
-
-//lazy val rtp = project enablePlugins BuildInfoPlugin dependsOn api
-
-//lazy val docs = project enablePlugins BuildInfoPlugin dependsOn(core, api, rtp)
-
-//lazy val test = project enablePlugins BuildInfoPlugin
-
+scmInfo := Some(
+  ScmInfo(
+    url("https://github/e8kor/Albert.git"),
+    "git@github.com/e8kor/Albert.git"
+  )
+)
 
 licenses in Global +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
@@ -38,31 +23,22 @@ homepage := Some(url("https://github.com/e8kor/Albert"))
 
 publishMavenStyle := true
 
-pomExtra in Global := {
+organization := "e8kor"
 
-  <scm>
-    <connection>scm:git:github.com/e8kor/Albert.git</connection>
-    <url>github.com/e8kor/Albert.git</url>
-  </scm>
+scalaVersion := "2.11.6"
 
-    <developers>
-      <developer>
-        <id>e8kor</id>
-        <name>IEvgenii Korniichuk</name>
-        <url>https://github.com/e8kor</url>
-      </developer>
-    </developers>
+crossScalaVersions := Seq("2.11.6", "2.10.5")
 
-}
+buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
-lazy val albert = project in file(".") enablePlugins (JavaAppPackaging, BuildInfoPlugin) aggregate( api, core )
+buildInfoPackage := s"${organization value}.${name value}.info"
 
-lazy val api = project enablePlugins BuildInfoPlugin
+lazy val albert = project in file(".") dependsOn(engine, plugin_api, integration_api, plugins) aggregate(engine, plugin_api, integration_api, plugins)
 
-lazy val core = project enablePlugins BuildInfoPlugin dependsOn (api,core_plugins)
+lazy val plugins = project dependsOn plugin_api
 
-lazy val core_plugins = project enablePlugins BuildInfoPlugin dependsOn api
+lazy val plugin_api = project
 
-(common nativePackagerSettings)
+lazy val engine = project dependsOn(plugin_api, integration_api)
 
-(common promptSettings)
+lazy val integration_api = project
