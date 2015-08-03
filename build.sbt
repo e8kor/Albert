@@ -31,6 +31,8 @@ scalaVersion := "2.11.6"
 
 crossScalaVersions := Seq("2.11.6", "2.10.5")
 
+mainClass in Compile := Some("org.system.Main")
+
 // TODO good option to make system typed
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-typed-experimental" % "2.4-M2" withSources(),
@@ -49,28 +51,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" withSources()
 )
 
-packageSummary in Universal := "Albert Structural Execution System"
-
-packageDescription in Universal := "Automated suite execution system"
-
-maintainer in Universal := "IEvgenii Korniichuk <nutscracker.ua@gmail.com>"
-
-wixProductId := "ce07be71-510d-414a-92d4-dff47631848a"
-
-wixProductUpgradeId := "4552fb0e-e257-4dbd-9ecb-dba9dbacf424"
-
-// TODO Need to understand whats wrong here
-//scriptClasspath ++= Seq("../conf", "../scripts")
-
-executableScriptName := "albert"
-
-mainClass in Compile := Some("org.system.Main")
-
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
 buildInfoPackage := s"${organization value}.${name value}.info"
 
-enablePlugins(JavaAppPackaging, BuildInfoPlugin)
+enablePlugins(BuildInfoPlugin)
 
 //scalacOptions := Seq(
 //  "-deprecation",
