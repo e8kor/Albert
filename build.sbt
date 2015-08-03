@@ -1,56 +1,43 @@
-import sbt._
-import Keys._
-import sbtassembly.Plugin._
-import sbtbuildinfo.Plugin._
-import AssemblyKeys._
+name := "Albert"
 
-name := "albert"
+normalizedName := "albert"
 
-version := "0.1-SNAPSHOT"
+description := "Automated system for command suite execution based on Akka actor system and plugins"
 
-scalaVersion := "2.11.0"
+startYear := Some(2014)
 
-autoCompilerPlugins := true
-
-resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo) ++ Seq("snapshots", "releases", "repo").map(Resolver.typesafeRepo)
-
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor"   % "2.3.3",
-  "com.typesafe.akka" %% "akka-contrib" % "2.3.3"
-) ++ Seq(
-  "org.scalaz"  %% "scalaz-core" % "7.0.6",
-  "com.chuusai" %% "shapeless"   % "2.0.0"
-) ++ Seq(
-  "com.beachape.filemanagement" %% "schwatcher" % "0.1.5",
-  "com.typesafe"                %  "config"     % "1.2.0"
-) ++ Seq(
-  "org.slf4j"      % "slf4j-api"       % "1.7.2",
-  "ch.qos.logback" % "logback-classic" % "1.1.1",
-  "ch.qos.logback" % "logback-core"    % "1.1.1"
-) ++ Seq(
-  "com.typesafe.akka" %% "akka-testkit"                % "2.3.3" % "test",
-  "org.scalamock"     %% "scalamock-scalatest-support" % "3.1.1" % "test",
-  "junit"             % "junit"                        % "4.11"  % "test",
-  "org.scalatest"     %  "scalatest_2.11"              % "2.2.0" % "test"
-)++ Seq(
-  "com.softwaremill.macwire" %% "macros" % "0.7",
-  "com.softwaremill.macwire" %% "runtime" % "0.7"
+developers := List(
+  Developer("e8kor", "IEvgenii Korniichuk", "nutscracker.ua@gmail.com", url("https://github.com/e8kor"))
 )
 
-buildInfoSettings
+scmInfo := Some(
+  ScmInfo(
+    url("https://github/e8kor/Albert.git"),
+    "git@github.com/e8kor/Albert.git"
+  )
+)
 
-buildInfoPackage := "org.albert.info"
+licenses in Global +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
-buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
+homepage := Some(url("https://github.com/e8kor/Albert"))
 
-sourceGenerators in Compile <+= buildInfo
+publishMavenStyle := true
 
-assemblySettings
+organization := "e8kor"
 
-jarName in assembly := "albert.jar"
+scalaVersion := "2.11.6"
 
-mainClass in assembly := Some("org.albert.dev.main.Main")
+crossScalaVersions := Seq("2.11.6", "2.10.5")
 
-addCompilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
+buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
-scalacOptions in (Compile, compile) += "-P:wartremover:only-warn-traverser:org.brianmckenna.wartremover.warts.Unsafe"
+buildInfoPackage := s"${organization value}.${name value}.info"
+
+libraryDependencies ++= Seq(
+  "com.typesafe.akka" %% "akka-actor" % "2.4-M2" withSources(),
+  "com.typesafe.akka" %% "akka-testkit" % "2.4-M2" % "test" withSources(),
+  "org.scalatest" %% "scalatest" % "2.2.5" % "test" withSources(),
+  "com.typesafe" % "config" % "1.2.0" withSources(),
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided" withSources(),
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" withSources()
+)
