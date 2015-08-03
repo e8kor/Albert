@@ -41,3 +41,20 @@ libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided" withSources(),
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" withSources()
 )
+
+packageSummary in Universal := "Albert Structural Execution System"
+
+packageDescription in Universal := "Automated suite execution system"
+
+maintainer in Universal := "IEvgenii Korniichuk <nutscracker.ua@gmail.com>"
+
+wixProductId := "ce07be71-510d-414a-92d4-dff47631848a"
+
+wixProductUpgradeId := "4552fb0e-e257-4dbd-9ecb-dba9dbacf424"
+
+// TODO Need to understand whats wrong here
+scriptClasspath ++= Seq("../conf", "../scripts")
+
+mainClass in Compile := Some("org.system.Main")
+
+enablePlugins(JavaAppPackaging, BuildInfoPlugin)
