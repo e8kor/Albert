@@ -2,9 +2,10 @@ name := "AlbertCorePlugins"
 
 normalizedName := "albert_core_plugins"
 
-description := """Automated system for structural suite execution.
-                 |Core plugins its minimal set of plugins with which system can work, also its a source for creation new plugins
-                 |More things comming...""".stripMargin
+description :=
+  """Automated system for structural suite execution.
+    |Core plugins its minimal set of plugins with which system can work, also its a source for creation new plugins
+    |More things comming...""".stripMargin
 
 startYear := Some(2014)
 
@@ -23,13 +24,15 @@ licenses in Global +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE
 
 homepage := Some(url("https://github.com/e8kor/AlbertCorePlugins"))
 
-publishMavenStyle := true
+publishMavenStyle := false
 
 organization := "e8kor"
 
 scalaVersion := "2.11.6"
 
 crossScalaVersions := Seq("2.11.6", "2.10.5")
+
+resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.4-M2" withSources(),
@@ -38,12 +41,17 @@ libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided" withSources(),
   "com.typesafe" % "config" % "1.2.0" withSources(),
   "com.googlecode.scalascriptengine" %% "scalascriptengine" % "1.3.10" withSources(),
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value withSources()
+  "org.scala-lang" % "scala-compiler" % scalaVersion.value withSources(),
+  "e8kor" %% "albert_plugin_api" % "0.1-SNAPSHOT"
 )
 
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
 buildInfoPackage := s"${organization value}.${name value}.info"
+
+bintrayOrganization in bintray := None
+
+bintrayPackageLabels := Seq("albert", "plugin", "example")
 
 enablePlugins(BuildInfoPlugin)
 
