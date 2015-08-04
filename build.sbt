@@ -21,7 +21,7 @@ licenses in Global +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE
 
 homepage := Some(url("https://github.com/e8kor/Albert"))
 
-publishMavenStyle := true
+publishMavenStyle := false
 
 organization := "e8kor"
 
@@ -52,7 +52,6 @@ wixProductId := "ce07be71-510d-414a-92d4-dff47631848a"
 
 wixProductUpgradeId := "4552fb0e-e257-4dbd-9ecb-dba9dbacf424"
 
-// TODO Need to understand whats wrong here
 scriptClasspath ++= Seq("../conf", "../scripts")
 
 mainClass in Compile := Some("org.system.Main")
