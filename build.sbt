@@ -24,13 +24,15 @@ licenses in Global +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE
 
 homepage := Some(url("https://github.com/e8kor/AlbertPluginAPI"))
 
-publishMavenStyle := true
+publishMavenStyle := false
 
 organization := "e8kor"
 
 scalaVersion := "2.11.6"
 
 crossScalaVersions := Seq("2.11.6", "2.10.5")
+
+resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
 libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.2.0" withSources(),
@@ -41,6 +43,10 @@ libraryDependencies ++= Seq(
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
 buildInfoPackage := s"${organization value}.${name value}.info"
+
+bintrayOrganization in bintray := None
+
+bintrayPackageLabels := Seq("albert", "plugin", "api")
 
 enablePlugins(BuildInfoPlugin)
 
