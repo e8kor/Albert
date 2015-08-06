@@ -30,8 +30,6 @@ organization := "e8kor"
 
 scalaVersion := "2.11.6"
 
-crossScalaVersions := Seq("2.11.6", "2.10.5")
-
 resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
 libraryDependencies ++= Seq(
@@ -39,6 +37,8 @@ libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided" withSources(),
   "com.typesafe.akka" %% "akka-actor" % "2.4-M2" withSources()
 )
+
+version := "0.1-SNAPSHOT"
 
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
