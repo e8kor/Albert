@@ -30,8 +30,6 @@ organization := "e8kor"
 
 scalaVersion := "2.11.6"
 
-crossScalaVersions := Seq("2.11.6", "2.10.5")
-
 resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
 libraryDependencies ++= Seq(
@@ -41,9 +39,10 @@ libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided" withSources(),
   "com.typesafe" % "config" % "1.2.0" withSources(),
   "com.googlecode.scalascriptengine" %% "scalascriptengine" % "1.3.10" withSources(),
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value withSources(),
-  "e8kor" %% "albert_plugin_api" % "0.1-SNAPSHOT"
+  "org.scala-lang" % "scala-compiler" % scalaVersion.value withSources()
 )
+
+version := "0.1-SNAPSHOT"
 
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
