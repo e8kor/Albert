@@ -10,3 +10,6 @@
 [submodule "plugins"]
 	path = plugins
 	url = git@github.com:e8kor/AlbertCorePlugins.git
+[submodule "service"]
+	path = service
+	url = git@github.com:e8kor/AlbertService.git
