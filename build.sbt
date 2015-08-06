@@ -29,7 +29,9 @@ organization := "e8kor"
 
 scalaVersion := "2.11.6"
 
-crossScalaVersions := Seq("2.11.6", "2.10.5")
+version := "0.1-SNAPSHOT"
+
+//crossScalaVersions := Seq("2.11.6", "2.10.5")
 
 resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
