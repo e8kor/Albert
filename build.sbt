@@ -19,6 +19,8 @@ scmInfo := Some(
   )
 )
 
+version := "0.1-SNAPSHOT"
+
 licenses in Global +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
 homepage := Some(url("https://github.com/e8kor/Albert"))
@@ -28,8 +30,6 @@ publishMavenStyle := false
 organization := "e8kor"
 
 scalaVersion := "2.11.6"
-
-crossScalaVersions := Seq("2.11.6", "2.10.5")
 
 mainClass in Compile := Some("org.system.Main")
 
@@ -50,9 +50,7 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.2.0" withSources(),
   "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" withSources(),
-  "e8kor" %% "albert_integration_api" % "0.1-SNAPSHOT",
-  "e8kor" %% "albert_plugin_api" % "0.1-SNAPSHOT"
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" withSources()
 )
 
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
