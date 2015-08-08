@@ -1,4 +1,4 @@
-package org.system.app.actors.main
+package org.system.app.actors
 
 import akka.actor._
 import akka.camel.CamelExtension
@@ -50,7 +50,7 @@ class JMXManager private(jmxConfig: Config) extends SystemActor {
 
   def jmxCommand(seq:IndexedSeq[ActorRef]): Receive = {
     case StartRootExecutor(rootExecutorDir) =>
-      val ref = (context system) actorOf(Props(RootExecutor(rootExecutorDir, hasJMXExecutor = true)), rootExecutorDir name)
+      val ref = (context system) actorOf(Props(RootExecutor(rootExecutorDir)), rootExecutorDir name)
 
       context become jmxCommand(seq :+ ref)
 
