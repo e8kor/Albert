@@ -40,7 +40,7 @@ class JMXManager private(jmxConfig: Config) extends SystemActor {
   val camel = CamelExtension(context system)
 
   (camel context) removeComponent (jmxConfig getString "mqComponent")
-  (camel context) addComponent(jmxConfig getString "mqComponent", ActiveMQComponent activeMQComponent)
+  (camel context) addComponent (jmxConfig getString "mqComponent", ActiveMQComponent activeMQComponent)
 
   val endpointF = (camel activationFutureFor consumerRef)(10 seconds, (context system) dispatcher)
 
