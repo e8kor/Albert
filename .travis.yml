@@ -1,6 +1,6 @@
 language: scala
 scala:
-  - 2.11.0
+  - 2.11.6
 branches:
   only:
     - trunk
@@ -10,5 +10,4 @@ notifications:
     recipients:
       - nutscracker@gmail.com
 jdk:
-  - openjdk7
   - oraclejdk7
