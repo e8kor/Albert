@@ -26,7 +26,7 @@ class MXBeanActor(config:Config) extends SystemActor with ActorJMX with MXBean {
   override def getMXTypeName: String = "ApplicationMXBean"
 
   override def startSuite(path: String): String = {
-    self ? StartRootExecutor(Directory(path))
+    self ! StartRootExecutor(Directory(path))
     "Request sent"
   }
 
@@ -58,9 +58,13 @@ trait ActorJMX {
 
   def getMXTypeName: String
 
-  override def preStart(): Unit = AkkaJMX registerToMBeanServer(this, objName)
+  override def preStart(): Unit = {
+    val objectInstance = AkkaJMX registerToMBeanServer(this, objName)
+  }
 
-  override def postStop(): Unit = AkkaJMX unregisterFromMBeanServer objName
+  override def postStop(): Unit = {
+    AkkaJMX unregisterFromMBeanServer objName
+  }
 }
 
 object AkkaJMX {
