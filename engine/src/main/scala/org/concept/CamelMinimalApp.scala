@@ -32,8 +32,9 @@ object CamelMinimalApp extends App {
   val actorSystem = ActorSystem("CamelTesting")
   val system = CamelExtension(actorSystem)
 
-  val amqUrl = ??? // TODO need to provide URL properly org.system.default("mqURL")
-  (system context) addComponent("activemq", ActiveMQComponent activeMQComponent amqUrl)
+  val amqUrl = "http://no_url" // TODO need to provide URL properly org.system.default("mqURL")
+
+  val unit =(system context) addComponent("activemq", ActiveMQComponent activeMQComponent amqUrl)
 
   val simpleConsumer = actorSystem actorOf Props[SimpleConsumer]
   val simpleProducer = actorSystem actorOf Props[SimpleProducer]
@@ -48,5 +49,5 @@ object CamelMinimalApp extends App {
   simpleProducer ! delayedMessage
 
   Thread sleep 5000 // wait for messages
-  actorSystem shutdown()
+  actorSystem terminate()
 }

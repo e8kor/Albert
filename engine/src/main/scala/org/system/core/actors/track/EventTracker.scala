@@ -16,9 +16,7 @@ object EventTracker {
 
 class EventTracker private() extends SystemActor {
 
-  import akka.event.EventStream.fromActorSystem
-
-  (context system) subscribe(self, classOf[Tracking])
+  ((context system) eventStream) subscribe(self, classOf[Tracking])
 
   override def receive: Receive = {
     case request: Tracking =>

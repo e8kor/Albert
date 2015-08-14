@@ -4,14 +4,13 @@ package actors
 package main
 
 import akka.actor.{ActorRef, PoisonPill, Props}
-import com.beachape.filemanagement.MonitorActor
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import org.system.api.command.manage._
 import org.system.core.actors.System.SystemActor
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 import org.system.core.command.track._
-import org.utils.implicits.{config2ConfigOps, dir2DirOps, path2PathOps}
+import org.utils.implicits.{config2ConfigOps, dir2DirOps}
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
@@ -30,10 +29,10 @@ object SuiteManager extends LazyLogging {
           |runner declaration style: ${
         if (suiteCfg bool "is_runner_config")
           s"""runners declared via config files
-             |loaded classes : ${suiteCfg getClasses "runners" map (_ getSimpleName) mkString "\n"}""".stripMargin
+              |loaded classes : ${suiteCfg getClasses "runners" map (_ getSimpleName) mkString "\n"}""".stripMargin
         else
           s"""runners declared as classes
-             |loaded configs :  ${suiteCfg getPluginsConfig "runners" map (_ toString ) mkString "\n"}""".stripMargin
+              |loaded configs :  ${suiteCfg getPluginsConfig "runners" map (_ toString) mkString "\n"}""".stripMargin
       }
           |passed dir: ${suiteDir path}
           |passed config: ${suiteCfg toString}""".stripMargin)
@@ -68,8 +67,6 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
 
   private val parallelExecution = suiteCfg bool "runners_parallel_execution"
 
-  private val fileWatchEnabled = suiteCfg bool "file_watch_enabled"
-
   private val runnerClasses = if (isRunnerConfig)
     suiteCfg getClasses "runners" // TODO need to check that class is subclass of akka.actor.Actor
   else
@@ -85,15 +82,6 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
     case (dir, cfg) =>
       context actorOf(Props(SuiteManager(dir, cfg)), dir name)
   } toIndexedSeq
-
-  if (fileWatchEnabled) {
-    val monitorRef = context actorOf MonitorActor(5)
-
-    (suiteDir getSuiteCallbacks) foreach {
-      callback =>
-        monitorRef ! callback
-    }
-  }
 
   ((context system) eventStream) subscribe(self, PublishStatus getClass)
 

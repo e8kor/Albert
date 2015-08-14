@@ -24,8 +24,4 @@ class DirectoryOps(val it: Directory) {
 
   def getConfig(fileName: String): Config = (it files) find (file => (file name) equals fileName) map (_ jfile) map parseFile orNull
 
-  def withDirCallback() = callback(Created, it, file => Unit /*logger info(s"monitor: directory created - ${file toString}", file)*/)
-
-  private def callback(kind: Kind[java.nio.file.Path], path: Path, callback: Callback) = RegisterCallback(kind, None, recursive = false, path, callback)
-
 }
