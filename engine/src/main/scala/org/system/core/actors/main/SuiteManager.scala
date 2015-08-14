@@ -68,9 +68,10 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
   private val parallelExecution = suiteCfg bool "runners_parallel_execution"
 
   private val runnerClasses = if (isRunnerConfig)
-    suiteCfg getClasses "runners" // TODO need to check that class is subclass of akka.actor.Actor
-  else
     suiteCfg getPluginsConfig "runners" flatMap (_ getClasses "main_class")
+  else
+    suiteCfg getClasses "runners" // TODO need to check that class is subclass of akka.actor.Actor
+
 
   private val runnerRefs = (runnerClasses zipWithIndex) map {
     case (clazz, index) =>
@@ -102,15 +103,27 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
 
       // TODO duplication of logic
       ((context system) eventStream) publish SuiteExecutionStarted(self, suiteDir)
-      if (parallelExecution) {
-        (runnerRefs par) foreach (_ ! StartWork(suiteDir, suiteCfg))
-      } else {
-        (runnerRefs head) ! StartWork(suiteDir, suiteCfg)
-      }
+      performExecution(runnerRefs, parallelExecution)
 
     case PublishStatus =>
       ((context system) eventStream) publish AwaitStart(self, suiteDir)
 
+  }
+
+  private def performExecution(runners: Seq[ActorRef], parallelExecution: Boolean): Unit = {
+    if (parallelExecution) {
+      (runners par) foreach (_ ! StartWork(suiteDir, suiteCfg))
+    } else {
+      if (runners nonEmpty) {
+        (runners head) ! StartWork(suiteDir, suiteCfg)
+      } else {
+        log warning
+          s""" Looks like no runners defined for testSuite:
+                        | path: ${suiteDir path}
+                        | config ${suiteCfg toString}
+           """.stripMargin
+      }
+    }
   }
 
   private def prepare(completed: IndexedSeq[ActorRef]): Receive = {
@@ -121,11 +134,7 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       context become work(IndexedSeq())
       // TODO duplication of logic
       ((context system) eventStream) publish SuiteExecutionStarted(self, suiteDir)
-      if (parallelExecution) {
-        (runnerRefs par) foreach (_ ! StartWork(suiteDir, suiteCfg))
-      } else {
-        (runnerRefs head) ! StartWork(suiteDir, suiteCfg)
-      }
+      performExecution(runnerRefs, parallelExecution)
 
     case SuiteCompleted =>
       log info s"sub suite completed \n path: ${sender() path}"
@@ -166,7 +175,7 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       context become work(tmp)
 
       ((context system) eventStream) publish RunnerExecutionCompleted(self, suiteDir)
-      if (!(suiteCfg bool "runners_parallel_execution")) {
+      if (!parallelExecution) {
         ((runnerRefs diff tmp) head) ! StartWork(suiteDir, suiteCfg)
       }
 
@@ -174,31 +183,5 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       ((context system) eventStream) publish AwaitRunnersExecution(self, suiteDir)
 
   }
-
-  //  private def stop: Receive = {
-  //    case Stop =>
-  //      log warning s"trying to stop, suite - ${suiteDir name}"
-  //      (suiteRefs :+ self) foreach (_ ! PoisonPill)
-  //  }
-  //
-  //  private def execute(refs: Seq[ActorRef], request: Request, parallel: Boolean) = {
-  //    import akka.pattern._
-  //
-  //    implicit val infinite = Timeout durationToTimeout FiniteDuration(10, TimeUnit MINUTES)
-  //
-  //    (if (parallel) {
-  //      runnerRefs par
-  //    } else {
-  //      runnerRefs seq
-  //    }) map {
-  //      ref =>
-  //        pipe(ref ask request) to(self, ref)
-  //    }
-  //
-  //  }
-  //
-  //  private def publish(tracking: Tracking) = {
-  //    ((context system) eventStream) publish tracking
-  //  }
 
 }

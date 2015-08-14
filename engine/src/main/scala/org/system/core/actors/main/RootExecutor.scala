@@ -61,8 +61,8 @@ object RootExecutor extends LazyLogging {
 
 class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config)(hasJMXExecutor: Boolean) extends SystemActor {
 
-  import scala.concurrent.duration.DurationInt
   import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.concurrent.duration.DurationInt
 
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
     case thr: Throwable =>
@@ -91,11 +91,22 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
     log info s"root executor initialization completed, waiting to your command"
   }
 
-  (((context system) scheduler) schedule (publishInitialDelay, publishInterval)) {
-    ((context system) eventStream) publish PublishStatus
+ val statusTask = (((context system) scheduler) schedule (publishInitialDelay, publishInterval)) {
+      ((context system) eventStream) publish PublishStatus
+    }
+
+  override def preStart(): Unit = {
+
   }
 
-  override def receive = awaitStart()
+  override def postStop(): Unit = {
+    if (!(statusTask isCancelled)) {
+      val state = statusTask cancel()
+        log info s" request status scheduled task was canceled ${if (state) "successfully" else "not successfully"} "
+    }
+  }
+
+  override def receive: Receive = awaitStart()
 
   def awaitCompletion(completed: Seq[ActorRef]): Receive = {
     case SuiteCompleted if ((completed :+ sender()) length) equals (suiteRefs length) =>
@@ -115,9 +126,5 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
       context become awaitCompletion(Seq())
       suiteRefs foreach (_ ! StartSuite)
   }
-
-  private def commandProducer = context child "CommandProducer"
-
-  private def commandConsumer = context child "CommandConsumer"
 
 }
