@@ -51,8 +51,8 @@ object RootExecutor extends LazyLogging {
           |${suiteDirs map (_._1) map (_ name) mkString ", "}""".stripMargin
 
     require(suiteDirs nonEmpty,
-      """illegal config: no suites found
-        |passed config: $rootCfg""")
+      s"""illegal config: no suites found
+          |passed config: $rootConfig""")
 
     new RootExecutor(rootDir)(suiteDirs)(rootConfig)(hasJMXExecutor)
   }
