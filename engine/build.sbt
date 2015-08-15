@@ -41,14 +41,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.4-M2" withSources(),
   "com.typesafe.akka" %% "akka-contrib" % "2.4-M2" withSources(),
   "com.typesafe.akka" %% "akka-remote" % "2.4-M2" withSources(),
-  "com.typesafe.akka" %% "akka-camel" % "2.4-M2" withSources(),
   "com.typesafe.akka" %% "akka-kernel" % "2.4-M2" withSources(),
   "com.typesafe.akka" %% "akka-testkit" % "2.4-M2" % "test" withSources(),
-  "com.beachape.filemanagement" %% "schwatcher" % "0.1.5" withSources(),
-  "org.apache.activemq" % "activemq-camel" % "5.11.1" withSources(),
   "org.scalatest" %% "scalatest" % "2.2.5" % "test" withSources(),
   "com.typesafe" % "config" % "1.2.0" withSources(),
-  "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
+  "ch.qos.logback" % "logback-classic" % "1.1.3"  withSources(),
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" withSources()
 )

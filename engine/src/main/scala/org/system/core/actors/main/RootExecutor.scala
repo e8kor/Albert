@@ -8,7 +8,6 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import org.system.core.actors.System.SystemActor
 import org.system.core.actors.track.EventTracker
-import org.system.core.command.jmx.RootExecutorCompleted
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 import org.system.core.command.track.PublishStatus
 import org.utils.implicits.{config2ConfigOps, dir2DirOps}
@@ -39,20 +38,27 @@ object RootExecutor extends LazyLogging {
   }
 
   def apply(dir: Directory, rootConfig: Config, hasJMXExecutor: Boolean): RootExecutor = {
+    logger info s"""Setting up root executor by
+                |path: ${dir path}
+                |config: ${rootConfig toString}""".stripMargin
 
     val rootDir = rootConfig findDirectory "root_directory" getOrElse dir
+
+    logger info s""" executor root subdirs:
+        |${(rootDir dirs) map ( _ path) mkString "\n"}
+      """.stripMargin
 
     val suiteDirs = rootDir zipDirsByFile "suite.conf"
 
     logger info s"root config directory: ${rootDir path} "
 
-    logger info
-      s"""root executor found suites:
+    logger info s"""root executor found suites:
           |${suiteDirs map (_._1) map (_ name) mkString ", "}""".stripMargin
 
     require(suiteDirs nonEmpty,
       s"""illegal config: no suites found
-          |passed config: $rootConfig""")
+          |passed config: $rootConfig
+          |path: ${rootDir path}""")
 
     new RootExecutor(rootDir)(suiteDirs)(rootConfig)(hasJMXExecutor)
   }
@@ -111,9 +117,9 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
   def awaitCompletion(completed: Seq[ActorRef]): Receive = {
     case SuiteCompleted if ((completed :+ sender()) length) equals (suiteRefs length) =>
       log info "root executor: all suites was completed"
-      if (hasJMXExecutor) {
-        (context parent) ! RootExecutorCompleted
-      }
+//      if (hasJMXExecutor) {
+//        (context parent) ! RootExecutorCompleted
+//      }
       self ! PoisonPill
     case SuiteCompleted =>
       log info "root executor: one of suites completed "

@@ -6,7 +6,7 @@ import com.typesafe.config.{ConfigFactory, Config}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
-import scala.reflect.io.Directory
+import scala.reflect.io.{Path, Directory}
 
 class ConfigOps(val config: Config) extends AnyVal {
 
@@ -50,7 +50,7 @@ class ConfigOps(val config: Config) extends AnyVal {
 
   def findDirectory(path: String): Option[Directory] = {
     if (config hasPath path) {
-      Some(Directory(config getString path))
+      Some(Path(config getString path) toDirectory)
     } else {
       None
     }
