@@ -1,13 +1,13 @@
+sudo: false
 language: scala
 scala:
   - 2.11.6
 branches:
   only:
-    - trunk
     - master
 notifications:
   email:
     recipients:
       - nutscracker@gmail.com
 jdk:
-  - oraclejdk7
+  - oraclejdk8
