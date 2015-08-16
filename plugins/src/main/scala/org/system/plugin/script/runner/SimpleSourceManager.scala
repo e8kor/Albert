@@ -2,13 +2,13 @@ package org.system.plugin.script.runner
 
 import akka.actor.PoisonPill
 import com.typesafe.config.ConfigFactory
-import org.system.api.command.manage.{ExecutionSuccessfullyCompleted, ExecutionCompleted, ExecutionFailed, StartWork}
+import org.system.plugin.command.manage.StartWork
+import org.system.plugin.command.manage.{ExecutionFailed, ExecutionSuccessfullyCompleted}
 import org.system.plugin.runner.PluginRunnerActor
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
-// TODO this plugin need to be developed
 class SimpleSourceManager extends PluginRunnerActor {
 
   override def receive: Receive = {

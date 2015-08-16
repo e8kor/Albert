@@ -1,14 +1,12 @@
 package org.system.plugin.shellscript.runner
 
-import java.io.File
-
 import akka.actor.PoisonPill
 import com.typesafe.config.ConfigFactory
-import org.system.api.command.manage.{ExecutionFailed, ExecutionSuccessfullyCompleted, StartWork}
+import org.system.plugin.command.manage.StartWork
+import org.system.plugin.command.manage.{ExecutionFailed, ExecutionSuccessfullyCompleted}
 import org.system.plugin.runner.PluginRunnerActor
 
 import scala.language.postfixOps
-import scala.reflect.io.{Directory, Path}
 
 class ShellScriptExecutor extends PluginRunnerActor {
 
@@ -22,11 +20,6 @@ class ShellScriptExecutor extends PluginRunnerActor {
       } map (_ jfile) map (ConfigFactory parseFile) getOrElse {
         cfg
       }
-
-      log info
-        s"""Subfolders:
-          | ${ (Directory(new File(".")) dirs) map (_ name) mkString "\n"}
-        """.stripMargin
 
       require(scriptExecutorConfig hasPath "script_path", "Script path is not defined in plugin configuration")
 

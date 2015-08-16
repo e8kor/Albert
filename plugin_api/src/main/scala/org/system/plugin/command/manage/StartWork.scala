@@ -1,4 +1,4 @@
-package org.system.api.command.manage
+package org.system.plugin.command.manage
 
 import com.typesafe.config.Config
 import org.system.api.command.Request

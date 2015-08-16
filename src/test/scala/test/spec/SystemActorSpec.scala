@@ -1,10 +1,9 @@
 package test.spec
 
-import akka.actor.{ActorLogging, ActorSystem}
+import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.scalalogging.LazyLogging
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
-import test.SuiteConfigFiles._
 
 import scala.language.postfixOps
 
@@ -18,13 +17,11 @@ class SystemActorSpec(system: ActorSystem)
 
   def this() = this(ActorSystem create "AlbertTest")
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
 
-    logger info s"relative path $relativePath"
-    //    prepareCamel(system)(ConfigFactory load())
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     TestKit shutdownActorSystem system
   }
 

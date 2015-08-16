@@ -35,14 +35,13 @@ mainClass in Compile := Some("org.system.Main")
 
 resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
-// TODO good option to make system typed
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-typed-experimental" % "2.4-M2" withSources(),
-  "com.typesafe.akka" %% "akka-actor" % "2.4-M2" withSources(),
-  "com.typesafe.akka" %% "akka-contrib" % "2.4-M2" withSources(),
-  "com.typesafe.akka" %% "akka-remote" % "2.4-M2" withSources(),
-  "com.typesafe.akka" %% "akka-kernel" % "2.4-M2" withSources(),
-  "com.typesafe.akka" %% "akka-testkit" % "2.4-M2" % "test" withSources(),
+  "com.typesafe.akka" %% "akka-typed-experimental" % "2.4-M3" withSources(),
+  "com.typesafe.akka" %% "akka-actor" % "2.4-M3" withSources(),
+  "com.typesafe.akka" %% "akka-contrib" % "2.4-M3" withSources(),
+  "com.typesafe.akka" %% "akka-remote" % "2.4-M3" withSources(),
+  "com.typesafe.akka" %% "akka-kernel" % "2.4-M3" withSources(),
+  "com.typesafe.akka" %% "akka-testkit" % "2.4-M3" % "test" withSources(),
   "org.scalatest" %% "scalatest" % "2.2.5" % "test" withSources(),
   "com.typesafe" % "config" % "1.2.0" withSources(),
   "ch.qos.logback" % "logback-classic" % "1.1.3"  withSources(),
@@ -57,8 +56,6 @@ buildInfoPackage := s"${organization value}.${name value}.info"
 bintrayOrganization in bintray := None
 
 bintrayPackageLabels := Seq("albert", "engine")
-
-enablePlugins(BuildInfoPlugin)
 
 scalacOptions := Seq(
   "-deprecation",

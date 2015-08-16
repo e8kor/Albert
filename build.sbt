@@ -1,5 +1,7 @@
 import sbt.Keys._
 
+import scala.language.postfixOps
+
 lazy val albert = project in file(".") dependsOn(
   engine, plugin_api, integration_api, plugins
   ) aggregate(
@@ -26,8 +28,8 @@ lazy val albert = project in file(".") dependsOn(
   buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion),
   buildInfoPackage := s"${organization value}.${name value}.info",
   libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-actor" % "2.4-M2" withSources(),
-    "com.typesafe.akka" %% "akka-testkit" % "2.4-M2" % "test" withSources(),
+    "com.typesafe.akka" %% "akka-actor" % "2.4-M3" withSources(),
+    "com.typesafe.akka" %% "akka-testkit" % "2.4-M3" % "test" withSources(),
     "org.scalatest" %% "scalatest" % "2.2.5" % "test" withSources(),
     "com.typesafe" % "config" % "1.2.0" withSources(),
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided" withSources(),
@@ -42,12 +44,12 @@ lazy val albert = project in file(".") dependsOn(
   mainClass in Compile := Some("org.system.Main")
   ) enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
-lazy val plugins = project dependsOn plugin_api
+lazy val plugins = project dependsOn plugin_api enablePlugins BuildInfoPlugin
 
-lazy val integration_api = project
+lazy val integration_api = project enablePlugins BuildInfoPlugin
 
-lazy val plugin_api = project
+lazy val plugin_api = project dependsOn integration_api enablePlugins BuildInfoPlugin
 
-lazy val engine = project dependsOn plugin_api
+lazy val engine = project dependsOn plugin_api enablePlugins BuildInfoPlugin
 
-lazy val service = project dependsOn(engine, integration_api)
+lazy val service = project dependsOn(engine, integration_api) enablePlugins BuildInfoPlugin

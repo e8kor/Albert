@@ -16,8 +16,7 @@ class Terminator(app: ActorRef)(implicit config:Config) extends SystemActor {
 
   def receive = {
     case Terminated(actorRef) ⇒
-      log info "root executor terminated - application shutting down"
-      // TODO if not JMX mode then need to terminate system here
+      log info "root executor terminated, suite completed"
   }
 
 }

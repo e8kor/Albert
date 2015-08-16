@@ -6,10 +6,11 @@ package main
 import akka.actor.{ActorRef, PoisonPill, Props}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.system.api.command.manage._
+import org.system.plugin.command.manage._
 import org.system.core.actors.System.SystemActor
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 import org.system.core.command.track._
+import org.system.plugin.command.manage.{StartWork, ExecutionCompleted}
 import org.utils.implicits.{config2ConfigOps, dir2DirOps}
 
 import scala.language.postfixOps
@@ -18,9 +19,6 @@ import scala.reflect.io.Directory
 object SuiteManager extends LazyLogging {
 
   def apply(suiteDir: Directory, suiteCfg: Config) = {
-
-    // TODO Configuration can be parsed to config case class and provided to suite
-    // TODO Didnt manage yet how to do it smoothly
 
     val isRunnerConfig = suiteCfg bool "is_runner_config"
 
@@ -48,21 +46,8 @@ object SuiteManager extends LazyLogging {
 
 }
 
-// TODO SuiteManager can be persistent actor
-// TODO possible case that suite will have no runners and sub suites, should such behaviour be allowed ?
 class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Config)])(suiteCfg: Config) extends SystemActor {
 
-  // TODO Plugin actors can be mentioned as config files that needed to loaded and passed to plugin
-  // TODO Now     - runners: [ "org.system.plugin.info.runner.InfoPrinter" ]
-  // TODO Example - runners: [ "simpleInfo.conf" ] or runners: [ "simpleInfo" ]
-  // TODO Remote  - remote configuration also should possible with declaring config files
-  // TODO Such configs can be packed with 3rd party jars or added to classpath
-  // TODO this approach need to be implemented
-  // -----------------------------------------
-  // TODO usability of plugins that declared via config files is approach to use plugin actors via remote connection
-
-
-  // TODO this option tells the way of declaring runners as described above
   private val isRunnerConfig = suiteCfg bool "is_runner_config"
 
   private val parallelExecution = suiteCfg bool "runners_parallel_execution"
@@ -70,15 +55,13 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
   private val runnerClasses = if (isRunnerConfig)
     suiteCfg getPluginsConfig "runners" flatMap (_ getClasses "main_class")
   else
-    suiteCfg getClasses "runners" // TODO need to check that class is subclass of akka.actor.Actor
-
+    suiteCfg getClasses "runners"
 
   private val runnerRefs = (runnerClasses zipWithIndex) map {
     case (clazz, index) =>
       context actorOf(Props(clazz), s"${suiteDir name}.${clazz getSimpleName}.$index")
   } toIndexedSeq
 
-  // TODO may be its good to have lazy suites initialization
   private val suiteRefs = suiteDirs map {
     case (dir, cfg) =>
       context actorOf(Props(SuiteManager(dir, cfg)), dir name)
@@ -101,7 +84,6 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       log info "no sub suites detected: execution started"
       context become work(IndexedSeq())
 
-      // TODO duplication of logic
       ((context system) eventStream) publish SuiteExecutionStarted(self, suiteDir)
       performExecution(runnerRefs, parallelExecution)
 
@@ -132,7 +114,6 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       log info s"sub suite completed \n path: ${sender() path}"
       log info s"all sub suites complete their work, suite - ${suiteDir name}"
       context become work(IndexedSeq())
-      // TODO duplication of logic
       ((context system) eventStream) publish SuiteExecutionStarted(self, suiteDir)
       performExecution(runnerRefs, parallelExecution)
 
@@ -147,7 +128,6 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
 
   }
 
-  // TODO need to implement fail test suite on single test failed as config option
   private def work(completed: IndexedSeq[ActorRef]): Receive = {
 
     case state: ExecutionCompleted if (runnerRefs length) equals ((completed :+ sender()) length) =>

@@ -31,8 +31,6 @@ scalaVersion := "2.11.6"
 
 version := "0.1-SNAPSHOT"
 
-//crossScalaVersions := Seq("2.11.6", "2.10.5")
-
 resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
@@ -42,8 +40,6 @@ buildInfoPackage := s"${organization value}.${name value}.info"
 bintrayOrganization in bintray := None
 
 bintrayPackageLabels := Seq("albert", "integration", "api")
-
-enablePlugins(BuildInfoPlugin)
 
 scalacOptions := Seq(
   "-deprecation",

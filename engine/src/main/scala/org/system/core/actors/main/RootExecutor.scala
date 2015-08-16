@@ -15,8 +15,6 @@ import org.utils.implicits.{config2ConfigOps, dir2DirOps}
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
-// TODO search for common standarts of reports about tests execution
-
 object RootExecutor extends LazyLogging {
 
   def apply(dir: Directory, hasJMXExecutor: Boolean): RootExecutor = {
@@ -76,7 +74,6 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
       SupervisorStrategy restart
   }
 
-  // TODO Configuration options should be parsed to case class to reduce code lines
   private val autoStart = rootConfig bool "auto_start"
 
   private val publishInitialDelay = (rootConfig duration "publish_status_initial_delay") getOrElse (1 second)
@@ -117,9 +114,6 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
   def awaitCompletion(completed: Seq[ActorRef]): Receive = {
     case SuiteCompleted if ((completed :+ sender()) length) equals (suiteRefs length) =>
       log info "root executor: all suites was completed"
-//      if (hasJMXExecutor) {
-//        (context parent) ! RootExecutorCompleted
-//      }
       self ! PoisonPill
     case SuiteCompleted =>
       log info "root executor: one of suites completed "

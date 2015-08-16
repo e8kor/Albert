@@ -40,8 +40,6 @@ bintrayOrganization in bintray := None
 
 bintrayPackageLabels := Seq("albert", "service", "server")
 
-enablePlugins(BuildInfoPlugin)
-
 scalacOptions := Seq(
   "-deprecation",
   "-feature",

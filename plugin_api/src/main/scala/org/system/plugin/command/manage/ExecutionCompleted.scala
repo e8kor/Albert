@@ -1,4 +1,4 @@
-package org.system.api.command.manage
+package org.system.plugin.command.manage
 
 import org.system.api.command.Response
 

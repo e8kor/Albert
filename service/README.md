@@ -1,2 +1,6 @@
 # AlbertService
-Automated system for structural suite execution. Service demonstrate ability of system to work as *nix like service. More things coming...
+
+Service is application that provide abstration under `RootExecution` and Engine flow.
+Abstraction provide:
+
+- JMX interface for execution of Albert application

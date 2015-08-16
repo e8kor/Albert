@@ -20,13 +20,6 @@ trait BootstrapComponent {
 
   def startup(): Unit = {
 
-    // TODO how to pass root directory here ?
-    // TODO first option via flag  -DalbertRoot=/some/path/to/suites
-    // TODO second option via JMX command :
-    // TODO jmx approach means that root.conf can be located separately from test suites
-    // TODO additional root.conf fields need to be declared (or removed for example absence of root_directory)
-    // TODO this approach need to be implemented
-
     require((sys props) contains "albertRoot", "invalid startup: directory under 'albertRoot' not defined")
 
     val startUpDir = Directory((sys props) ("albertRoot"))

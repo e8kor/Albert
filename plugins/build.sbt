@@ -33,8 +33,8 @@ scalaVersion := "2.11.6"
 resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.4-M2" withSources(),
-  "com.typesafe.akka" %% "akka-testkit" % "2.4-M2" % "test" withSources(),
+  "com.typesafe.akka" %% "akka-actor" % "2.4-M3" withSources(),
+  "com.typesafe.akka" %% "akka-testkit" % "2.4-M3" % "test" withSources(),
   "org.scalatest" %% "scalatest" % "2.2.5" % "test" withSources(),
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided" withSources(),
   "com.typesafe" % "config" % "1.2.0" withSources(),
@@ -51,8 +51,6 @@ buildInfoPackage := s"${organization value}.${name value}.info"
 bintrayOrganization in bintray := None
 
 bintrayPackageLabels := Seq("albert", "plugin", "example")
-
-enablePlugins(BuildInfoPlugin)
 
 scalacOptions := Seq(
   "-deprecation",

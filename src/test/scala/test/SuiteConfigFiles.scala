@@ -5,11 +5,8 @@ import scala.reflect.io.Directory
 
 object SuiteConfigFiles {
 
-  val relativePath ={
-    val url = getClass getResource "/TestSuites"
+  val relativePath = "./src/test/resources/TestSuites"
 
-    url getFile
-  }
   val testSuite1Dir = Directory(s"$relativePath/TestSuite1")
 
   val testSuite2Dir = Directory(s"$relativePath/TestSuite2")
