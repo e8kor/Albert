@@ -38,8 +38,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.4-M3" withSources()
 )
 
-version := "0.1-SNAPSHOT"
-
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
 buildInfoPackage := s"${organization value}.${name value}.info"

@@ -30,8 +30,6 @@ organization := "e8kor"
 
 scalaVersion := "2.11.6"
 
-version := "0.1-SNAPSHOT"
-
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
 buildInfoPackage := s"${organization value}.${name value}.info"
