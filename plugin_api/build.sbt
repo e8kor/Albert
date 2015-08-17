@@ -39,8 +39,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.4.2" withSources()
 )
 
-version := "0.1-SNAPSHOT"
-
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
 
 buildInfoPackage := s"${organization value}.${name value}.info"

@@ -29,8 +29,6 @@ organization := "e8kor"
 
 scalaVersion := "2.11.6"
 
-version := "0.1-SNAPSHOT"
-
 resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 
 buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion)
