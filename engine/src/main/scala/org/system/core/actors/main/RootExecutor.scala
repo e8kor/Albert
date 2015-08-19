@@ -17,56 +17,30 @@ import scala.reflect.io.Directory
 
 object RootExecutor extends LazyLogging {
 
-  def apply(dir: Directory, hasJMXExecutor: Boolean): RootExecutor = {
-    dir findConfig "root.conf" match {
-      case Some(rootConf) =>
-        RootExecutor(dir, rootConf, hasJMXExecutor)
-      case None =>
-        sys error s"invalid path: root config not found by \n path: ${dir path}"
-    }
-  }
-
   def apply(dir: Directory): RootExecutor = {
     dir findConfig "root.conf" match {
       case Some(rootConf) =>
-        RootExecutor(dir, rootConf, hasJMXExecutor = false)
+        RootExecutor(dir, rootConf)
       case None =>
         sys error s"invalid path: root config not found by \n path: ${dir path}"
     }
   }
 
-  def apply(dir: Directory, rootConfig: Config, hasJMXExecutor: Boolean): RootExecutor = {
-    logger info s"""Setting up root executor by
-                |path: ${dir path}
-                |config: ${rootConfig toString}""".stripMargin
+  def apply(dir: Directory, rootConfig: Config): RootExecutor = {
 
-    val rootDir = rootConfig findDirectory "root_directory" getOrElse dir
+    logger info
+      s"""Setting up root executor by
+          |path: ${dir path}
+          |config: ${rootConfig toString}""".stripMargin
 
-    logger info s""" executor root subdirs:
-        |${(rootDir dirs) map ( _ path) mkString "\n"}
-      """.stripMargin
-
-    val suiteDirs = rootDir zipDirsByFile "suite.conf"
-
-    logger info s"root config directory: ${rootDir path} "
-
-    logger info s"""root executor found suites:
-          |${suiteDirs map (_._1) map (_ name) mkString ", "}""".stripMargin
-
-    require(suiteDirs nonEmpty,
-      s"""illegal config: no suites found
-          |passed config: $rootConfig
-          |path: ${rootDir path}""")
-
-    new RootExecutor(rootDir)(suiteDirs)(rootConfig)(hasJMXExecutor)
+    new RootExecutor(dir)(rootConfig)
   }
 
 }
 
-class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Directory, Config)])(rootConfig: Config)(hasJMXExecutor: Boolean) extends SystemActor {
+class RootExecutor private(configDirectory: Directory)(config: Config) extends SystemActor {
 
   import scala.concurrent.ExecutionContext.Implicits.global
-  import scala.concurrent.duration.DurationInt
 
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
     case thr: Throwable =>
@@ -74,29 +48,25 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
       SupervisorStrategy restart
   }
 
-  private val autoStart = rootConfig bool "auto_start"
+  val rootConfig = config asRootConfig configDirectory
 
-  private val publishInitialDelay = (rootConfig duration "publish_status_initial_delay") getOrElse (1 second)
+  val statusTask = (((context system) scheduler) schedule (rootConfig publishStatusIntialDelay, rootConfig publishStatusInterval)) {
+      ((context system) eventStream) publish PublishStatus
+    }
 
-  private val publishInterval = (rootConfig duration "publish_status_interval_delay") getOrElse (5 seconds)
-
-  private val suiteRefs = suiteDirectories map {
+  private val suiteRefs = (rootConfig suiteDirs) map {
     case (dir, conf) =>
       context actorOf(Props(SuiteManager(dir, conf)), dir name)
   }
 
-  private val eventTracker = context actorOf(Props(EventTracker()), s"${rootDirectory name}.${classOf[EventTracker] getSimpleName}")
-
-  if (autoStart || hasJMXExecutor) {
+  if (rootConfig autoStart) {
     log info s"root executor start ${suiteRefs length} suites automatically"
     self ! StartSuite
   } else {
     log info s"root executor initialization completed, waiting to your command"
   }
 
- val statusTask = (((context system) scheduler) schedule (publishInitialDelay, publishInterval)) {
-      ((context system) eventStream) publish PublishStatus
-    }
+  private val eventTracker = context actorOf(Props(EventTracker()), s"${configDirectory name}.${classOf[EventTracker] getSimpleName}")
 
   override def preStart(): Unit = {
 
@@ -105,7 +75,7 @@ class RootExecutor private(rootDirectory: Directory)(suiteDirectories: Seq[(Dire
   override def postStop(): Unit = {
     if (!(statusTask isCancelled)) {
       val state = statusTask cancel()
-        log info s" request status scheduled task was canceled ${if (state) "successfully" else "not successfully"} "
+      log info s" request status scheduled task was canceled ${if (state) "successfully" else "not successfully"} "
     }
   }
 

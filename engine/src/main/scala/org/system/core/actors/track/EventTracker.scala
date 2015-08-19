@@ -1,6 +1,5 @@
 package org.system.core.actors.track
 
-import org.system.api.command.{Request, Response}
 import org.system.core.actors.System.SystemActor
 import org.system.core.command.track.Tracking
 

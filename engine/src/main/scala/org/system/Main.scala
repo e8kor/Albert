@@ -1,17 +1,17 @@
 package org.system
 
 import akka.actor.{ActorSystem, Props}
-import scala.concurrent.duration._
 import com.typesafe.config.{Config, ConfigFactory}
 import org.system.core.actors.delegat.Terminator
 import org.system.core.actors.main.RootExecutor
 
 import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.reflect.io.Directory
 
 trait BootstrapComponent {
-  self:App =>
+  self: App =>
 
   def actorSystem: ActorSystem
 

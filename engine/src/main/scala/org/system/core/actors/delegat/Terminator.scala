@@ -10,7 +10,7 @@ import org.system.core.actors.System.SystemActor
 
 import scala.language.postfixOps
 
-class Terminator(app: ActorRef)(implicit config:Config) extends SystemActor {
+class Terminator(app: ActorRef)(implicit config: Config) extends SystemActor {
 
   context watch app
 
