@@ -35,7 +35,8 @@ resolvers += (Resolver bintrayRepo("e8kor", "maven"))
 libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.2.0" withSources(),
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided" withSources(),
-  "com.typesafe.akka" %% "akka-actor" % "2.4-M3" withSources()
+  "com.typesafe.akka" %% "akka-actor" % "2.4-M3" withSources(),
+  "com.typesafe.play" %% "play-json" % "2.4.2" withSources()
 )
 
 version := "0.1-SNAPSHOT"

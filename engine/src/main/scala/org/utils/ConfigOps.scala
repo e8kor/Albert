@@ -1,26 +1,58 @@
 package org.utils
 
-import scala.concurrent.duration.TimeUnit
-import scala.concurrent.duration.SECONDS
-import com.typesafe.config.{ConfigFactory, Config}
+import com.typesafe.config.{Config, ConfigFactory}
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.{FiniteDuration, SECONDS, TimeUnit}
 import scala.language.postfixOps
-import scala.reflect.io.{Path, Directory}
+import scala.reflect.io.{Directory, Path}
 
 class ConfigOps(val config: Config) extends AnyVal {
 
-  def getClass(path: String): Class[_] = {
-    findClass(path) getOrElse (sys error s"class not found by path - $path")
+  def asRootConfig(configDir: Directory): RootConfig = {
+
+    import scala.concurrent.duration.DurationInt
+    RootConfig(
+      rootDirectory = findDirectory("root_directory") getOrElse configDir,
+      publishStatusIntialDelay = duration("publish_status_initial_delay") getOrElse (1 second),
+      publishStatusInterval = duration("publish_status_interval_delay") getOrElse (5 seconds),
+      autoStart = bool("auto_start")
+    )
   }
 
-  def findClass(path: String): Option[Class[_]] = {
+  def findDirectory(path: String): Option[Directory] = {
     if (config hasPath path) {
-      val clazz = (getClass() getClassLoader()) loadClass (config getString path)
-      Option(clazz)
+      Some(Path(config getString path) toDirectory)
     } else {
       None
     }
+  }
+
+  def duration(path: String, timeUnit: TimeUnit = SECONDS): Option[FiniteDuration] = {
+    import scala.concurrent.duration.pairLongToDuration
+    if (config hasPath path) {
+      Some((config getDuration(path, timeUnit)) -> timeUnit)
+    } else {
+      None
+    }
+  }
+
+  def asSuiteConfig(suiteDirectory: Directory): SuiteConfig = {
+
+    val pluginClasses = if (bool("is_runner_config"))
+      getPluginsConfig("runners") map (new ConfigOps(_)) flatMap (pluginConf => pluginConf getClasses "main_class")
+    else
+      getClasses("runners")
+
+    require(pluginClasses nonEmpty,
+      s"""illegal config: suite runner not defined
+          |passed dir: ${suiteDirectory path}
+          |passed config: ${config toString}""" stripMargin)
+
+    SuiteConfig(
+      suiteDirectory = suiteDirectory,
+      runnerParallelExecution = bool("runners_parallel_execution"),
+      pluginClasses = pluginClasses
+    )
   }
 
   def getClasses(path: String): Seq[Class[_]] = {
@@ -48,18 +80,6 @@ class ConfigOps(val config: Config) extends AnyVal {
     }
   }
 
-  def findDirectory(path: String): Option[Directory] = {
-    if (config hasPath path) {
-      Some(Path(config getString path) toDirectory)
-    } else {
-      None
-    }
-  }
-
-  def getDirectory(path: String) = {
-    Directory(config getString path)
-  }
-
   def bool(path: String) = {
     if (config hasPath path) {
       config getBoolean path
@@ -68,13 +88,21 @@ class ConfigOps(val config: Config) extends AnyVal {
     }
   }
 
-  def duration(path:String, timeUnit: TimeUnit = SECONDS):Option[FiniteDuration] = {
-    import scala.concurrent.duration.pairLongToDuration
+  def getClass(path: String): Class[_] = {
+    findClass(path) getOrElse (sys error s"class not found by path - $path")
+  }
+
+  def findClass(path: String): Option[Class[_]] = {
     if (config hasPath path) {
-      Some((config getDuration (path, timeUnit)) -> timeUnit)
+      val clazz = (getClass() getClassLoader()) loadClass (config getString path)
+      Option(clazz)
     } else {
       None
     }
+  }
+
+  def getDirectory(path: String) = {
+    Directory(config getString path)
   }
 
 }

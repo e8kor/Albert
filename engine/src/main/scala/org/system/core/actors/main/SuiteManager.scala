@@ -19,57 +19,28 @@ import scala.reflect.io.Directory
 object SuiteManager extends LazyLogging {
 
   def apply(suiteDir: Directory, suiteCfg: Config) = {
-
-    val isRunnerConfig = suiteCfg bool "is_runner_config"
-
-    require((if (isRunnerConfig) suiteCfg getPluginsConfig "runners" else suiteCfg getClasses "runners") nonEmpty,
-      s"""illegal config: suite runner not defined
-          |runner declaration style: ${
-        if (suiteCfg bool "is_runner_config")
-          s"""runners declared via config files
-              |loaded classes : ${suiteCfg getClasses "runners" map (_ getSimpleName) mkString "\n"}""".stripMargin
-        else
-          s"""runners declared as classes
-              |loaded configs :  ${suiteCfg getPluginsConfig "runners" map (_ toString) mkString "\n"}""".stripMargin
-      }
-          |passed dir: ${suiteDir path}
-          |passed config: ${suiteCfg toString}""".stripMargin)
-
-    val suiteDirs = suiteDir zipDirsByFile "suite.conf"
-
-    logger info
-      s"""suite manager found suites:
-          | ${suiteDirs map (_._1) map (_ name) mkString ", "}""".stripMargin
-
-    new SuiteManager(suiteDir)(suiteDirs)(suiteCfg)
+    new SuiteManager(suiteDir)(suiteCfg)
   }
 
 }
 
-class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Config)])(suiteCfg: Config) extends SystemActor {
+class SuiteManager private(suite: Directory)(config: Config) extends SystemActor {
 
-  private val isRunnerConfig = suiteCfg bool "is_runner_config"
+  val suiteConfig = config asSuiteConfig suite
 
-  private val parallelExecution = suiteCfg bool "runners_parallel_execution"
-
-  private val runnerClasses = if (isRunnerConfig)
-    suiteCfg getPluginsConfig "runners" flatMap (_ getClasses "main_class")
-  else
-    suiteCfg getClasses "runners"
-
-  private val runnerRefs = (runnerClasses zipWithIndex) map {
+  private val runnerRefs = ((suiteConfig pluginClasses) zipWithIndex) map {
     case (clazz, index) =>
-      context actorOf(Props(clazz), s"${suiteDir name}.${clazz getSimpleName}.$index")
+      context actorOf(Props(clazz), s"${suite name}.${clazz getSimpleName}.$index")
   } toIndexedSeq
 
-  private val suiteRefs = suiteDirs map {
+  private val suiteRefs = (suiteConfig suiteDirs) map {
     case (dir, cfg) =>
       context actorOf(Props(SuiteManager(dir, cfg)), dir name)
   } toIndexedSeq
 
   ((context system) eventStream) subscribe(self, PublishStatus getClass)
 
-  log info s"suite - ${suiteDir name}: initializing ${suiteRefs length} suites: \n ${suiteRefs mkString "\n"}"
+  log info s"suite - ${suite name}: initializing ${suiteRefs length} suites: \n ${suiteRefs mkString "\n"}"
 
   override def receive: Receive = awaitStart
 
@@ -84,25 +55,25 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       log info "no sub suites detected: execution started"
       context become work(IndexedSeq())
 
-      ((context system) eventStream) publish SuiteExecutionStarted(self, suiteDir)
-      performExecution(runnerRefs, parallelExecution)
+      ((context system) eventStream) publish SuiteExecutionStarted(self, suite)
+      performExecution(runnerRefs, suiteConfig runnerParallelExecution)
 
     case PublishStatus =>
-      ((context system) eventStream) publish AwaitStart(self, suiteDir)
+      ((context system) eventStream) publish AwaitStart(self, suite)
 
   }
 
   private def performExecution(runners: Seq[ActorRef], parallelExecution: Boolean): Unit = {
     if (parallelExecution) {
-      (runners par) foreach (_ ! StartWork(suiteDir, suiteCfg))
+      (runners par) foreach (_ ! StartWork(suite, config))
     } else {
       if (runners nonEmpty) {
-        (runners head) ! StartWork(suiteDir, suiteCfg)
+        (runners head) ! StartWork(suite, config)
       } else {
         log warning
           s""" Looks like no runners defined for testSuite:
-                        | path: ${suiteDir path}
-                        | config ${suiteCfg toString}
+                        | path: ${suite path}
+                        | config ${config toString}
            """.stripMargin
       }
     }
@@ -112,19 +83,19 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
 
     case SuiteCompleted if (suiteRefs length) equals ((completed :+ sender()) length) =>
       log info s"sub suite completed \n path: ${sender() path}"
-      log info s"all sub suites complete their work, suite - ${suiteDir name}"
+      log info s"all sub suites complete their work, suite - ${suite name}"
       context become work(IndexedSeq())
-      ((context system) eventStream) publish SuiteExecutionStarted(self, suiteDir)
-      performExecution(runnerRefs, parallelExecution)
+      ((context system) eventStream) publish SuiteExecutionStarted(self, suite)
+      performExecution(runnerRefs, suiteConfig runnerParallelExecution)
 
     case SuiteCompleted =>
       log info s"sub suite completed \n path: ${sender() path}"
-      log info s"one of sub suites complete their work, suite - ${suiteDir name}"
+      log info s"one of sub suites complete their work, suite - ${suite name}"
 
       context become prepare(completed :+ sender())
 
     case PublishStatus =>
-      ((context system) eventStream) publish AwaitSuiteExecution(self, suiteDir)
+      ((context system) eventStream) publish AwaitSuiteExecution(self, suite)
 
   }
 
@@ -133,10 +104,10 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
     case state: ExecutionCompleted if (runnerRefs length) equals ((completed :+ sender()) length) =>
 
       log info s"runner completed work \n path: ${sender() path}"
-      log info s"all runners completed work: suite - ${suiteDir name}"
+      log info s"all runners completed work: suite - ${suite name}"
       log info s"sending completion status to parent \n parent path : ${(context parent) path}"
 
-      ((context system) eventStream) publish SuiteExecutionCompleted(self, suiteDir)
+      ((context system) eventStream) publish SuiteExecutionCompleted(self, suite)
       (context parent) ! SuiteCompleted
       self ! PoisonPill
 
@@ -145,7 +116,7 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
       val tmp = completed :+ sender()
 
       log info s"runner completed \n path: ${sender() path}"
-      log info s"one more runner completed work: suite - ${suiteDir name}"
+      log info s"one more runner completed work: suite - ${suite name}"
       log info
         s"""execution status:
             | total runners - ${runnerRefs length}
@@ -154,13 +125,13 @@ class SuiteManager private(suiteDir: Directory)(suiteDirs: Seq[(Directory, Confi
 
       context become work(tmp)
 
-      ((context system) eventStream) publish RunnerExecutionCompleted(self, suiteDir)
-      if (!parallelExecution) {
-        ((runnerRefs diff tmp) head) ! StartWork(suiteDir, suiteCfg)
+      ((context system) eventStream) publish RunnerExecutionCompleted(self, suite)
+      if (!(suiteConfig runnerParallelExecution)) {
+        ((runnerRefs diff tmp) head) ! StartWork(suite, config)
       }
 
     case PublishStatus =>
-      ((context system) eventStream) publish AwaitRunnersExecution(self, suiteDir)
+      ((context system) eventStream) publish AwaitRunnersExecution(self, suite)
 
   }
 
