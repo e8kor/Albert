@@ -6,12 +6,11 @@ package main
 import akka.actor.{ActorRef, PoisonPill, Props}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.system.plugin.command.manage._
 import org.system.core.actors.System.SystemActor
 import org.system.core.command.manage.{StartSuite, SuiteCompleted}
 import org.system.core.command.track._
-import org.system.plugin.command.manage.{StartWork, ExecutionCompleted}
-import org.utils.implicits.{config2ConfigOps, dir2DirOps}
+import org.system.plugin.command.manage.{ExecutionCompleted, StartWork}
+import org.utils.implicits.config2ConfigOps
 
 import scala.language.postfixOps
 import scala.reflect.io.Directory
@@ -72,8 +71,8 @@ class SuiteManager private(suite: Directory)(config: Config) extends SystemActor
       } else {
         log warning
           s""" Looks like no runners defined for testSuite:
-                        | path: ${suite path}
-                        | config ${config toString}
+              | path: ${suite path}
+              | config ${config toString}
            """.stripMargin
       }
     }

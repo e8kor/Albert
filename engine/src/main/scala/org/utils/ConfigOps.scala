@@ -36,6 +36,14 @@ class ConfigOps(val config: Config) extends AnyVal {
     }
   }
 
+  def bool(path: String) = {
+    if (config hasPath path) {
+      config getBoolean path
+    } else {
+      false
+    }
+  }
+
   def asSuiteConfig(suiteDirectory: Directory): SuiteConfig = {
 
     val pluginClasses = if (bool("is_runner_config"))
@@ -67,7 +75,6 @@ class ConfigOps(val config: Config) extends AnyVal {
     }
   }
 
-
   def getPluginsConfig(path: String): Seq[Config] = {
     import scala.collection.JavaConversions.asScalaBuffer
     if (config hasPath path) {
@@ -77,14 +84,6 @@ class ConfigOps(val config: Config) extends AnyVal {
       }
     } else {
       Seq()
-    }
-  }
-
-  def bool(path: String) = {
-    if (config hasPath path) {
-      config getBoolean path
-    } else {
-      false
     }
   }
 

@@ -40,13 +40,13 @@ object RootExecutor extends LazyLogging {
 
 class RootExecutor private(configDirectory: Directory)(config: Config) extends SystemActor {
 
+  import scala.concurrent.ExecutionContext.Implicits.global
+
   override val supervisorStrategy = OneForOneStrategy(loggingEnabled = true) {
     case thr: Throwable =>
       log error(thr, "going to restart")
       SupervisorStrategy restart
   }
-
-  import scala.concurrent.ExecutionContext.Implicits.global
 
   val rootConfig = config asRootConfig configDirectory
 
