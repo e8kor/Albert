@@ -1,10 +1,18 @@
 package org.system.plugin.command.manage
 
 import org.system.api.command.Response
+import play.api.libs.json.{JsObject, JsString, JsValue}
 
-sealed trait ExecutionCompleted extends Response
+sealed trait Successfully
 
-case object ExecutionSuccessfullyCompleted extends ExecutionCompleted
+sealed trait Failed
 
-case object ExecutionFailed extends ExecutionCompleted
+sealed trait ExecutionCompleted extends Response {
 
+  def report: JsValue
+
+}
+
+case class ExecutionSuccessfullyCompleted( report: JsValue = JsObject(Seq("report" -> JsString("no report"))) )  extends ExecutionCompleted with Successfully
+
+case class ExecutionFailed( report: JsValue = JsObject(Seq("report" -> JsString("no report"))) )  extends ExecutionCompleted with Failed
